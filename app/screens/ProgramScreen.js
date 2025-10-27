@@ -9,7 +9,7 @@ export default function ProgramScreen() {
                 <Appbar.Content title="Treeniohjelmat" />
             </Appbar.Header>
             <View style={styles.content}>
-                <Text style={styles.text}>Harjoitusohjelmien hallinta tulossa myöhemmin...</Text>
+                <Text style={styles.text}>Harjoitusohjelmien hallinta tulossa...</Text>
             </View>
         </View>
     );
