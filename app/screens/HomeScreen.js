@@ -1,19 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import CustAppBar from '../components/CustAppBar';
+
 
 export default function HomeScreen() {
-    return (
-        <View style={styles.container}>
-            <Appbar.Header>
-                <Appbar.Content title="FitComp" />
-            </Appbar.Header>
-            <View style={styles.content}>
-                <Text style={styles.text}> Tervetuloa FitComp sovellukseen 💪</Text>
-                <Text style={styles.subtext}>Valitse toiminto alavalikosta aloittaaksesi</Text>
-            </View>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <CustAppBar title="FitComp" />
+      <View style={styles.content}>
+        <Text style={styles.text}>Tervetuloa FitComp-sovellukseen 💪</Text>
+        <Text style={styles.subtext}>Valitse toiminto alavalikosta aloittaaksesi</Text>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

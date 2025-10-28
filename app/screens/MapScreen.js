@@ -1,18 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import CustAppBar from '../components/CustAppBar';
 
 export default function MapScreen() {
-    return (
-        <View style={styles.container}>
-            <Appbar.Header>
-                <Appbar.Content title="Kuntosalikartta" />
-            </Appbar.Header>
-            <View style={styles.content}>
-                <Text style={styles.text}>Karttanäkymä tulossa myöhemmin...</Text>
-            </View>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <CustAppBar title="Kuntosalikartta" />
+      <View style={styles.content}>
+        <Text style={styles.text}>Tähän tulee karttanäkymä 💡</Text>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

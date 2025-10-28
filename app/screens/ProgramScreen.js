@@ -1,19 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import CustAppBar from '../components/CustAppBar';
+
 
 export default function ProgramScreen() {
-    return (
-        <View style={styles.container}>
-            <Appbar.Header>
-                <Appbar.Content title="Treeniohjelmat" />
-            </Appbar.Header>
-            <View style={styles.content}>
-                <Text style={styles.text}>Harjoitusohjelmien hallinta tulossa...</Text>
-            </View>
-        </View>
-    );
+     return (
+    <View style={styles.container}>
+      <CustAppBar title="Treeniohjelmat" />
+      <View style={styles.content}>
+        <Text style={styles.text}>Treeniohjelmien hallinta tulossa 🏋️‍♂️</Text>
+      </View>
+    </View>
+  );
 }
+
 
 const styles = StyleSheet.create({
     container: {flex: 1, backgroundColor: '#fff' },

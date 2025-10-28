@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import CustAppBar from '../components/CustAppBar';
+
 
 export default function ExerciseScreen() {
     return (
         <View style={styles.container}>
-            <Appbar.Header>
-                <Appbar.Content title="Liikepankki" />
-            </Appbar.Header>
+            <CustAppBar title="Liikepankki" />
             <View style={styles.content}>
                 <Text style={styles.text}>REST API ja liikepankki tulossa myöhemmin...</Text>
             </View>
