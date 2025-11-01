@@ -25,12 +25,28 @@ export default function ProgramScreen() {
         setProgramDesc('');
     };
 
+    const deleteProgram = (id) => {
+        setPrograms(programs.filter((p) => p.id !== id));
+    };
+
+    // myöhemmin lisätään navigointi yksityiskohtiin.
+    const openProgram = (program) => {
+        console.log('Avaa ohjelma:', program);
+    }
+
     const renderProgram = ({ item }) => (
-        <Card style={styles.card}>
-            <Card.Title title={item.programName}
-                subtitle={item.programDesc} />
-        </Card>
-    );
+    <Card style={styles.card}>
+      <Card.Title title={item.programName} subtitle={item.programDesc || 'Ei kuvausta'} />
+      <Card.Actions style={styles.cardActions}>
+        <Button mode="outlined" onPress={() => openProgram(item)}>
+          Avaa
+        </Button>
+        <Button mode="text" onPress={() => deleteProgram(item.id)} textColor="#e53935">
+          Poista
+        </Button>
+      </Card.Actions>
+    </Card>
+  );
 
      return (
     <View style={styles.container}>
@@ -87,5 +103,10 @@ const styles = StyleSheet.create({
   input: { marginBottom: 10 },
   button: { marginBottom: 20 },
   card: { marginBottom: 10, elevation: 2 },
+  cardActions: {
+    justifyContent: 'flex-end',
+    paddingRight: 8,
+    paddingBottom: 8,
+  },
   emptyText: { textAlign: 'center', color: '#777', marginTop: 20 },
 });
