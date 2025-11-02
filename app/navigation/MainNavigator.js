@@ -8,6 +8,7 @@ import MapScreen from '../screens/MapScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import ProgramScreen from '../screens/ProgramScreen';
 import ExerciseScreen from '../screens/ExerciseScreen';
+import ProgramStack from './ProgramStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -55,7 +56,7 @@ export default function MainNavigator() {
                 />
                 <Tab.Screen
                     name="Programs"
-                    component={ProgramScreen}
+                    component={ProgramStack}
                     options={{
                         tabBarLabel: 'Programs',
                         tabBarIcon: ({ color, size }) => (  
@@ -73,6 +74,8 @@ export default function MainNavigator() {
                         ),
                     }}
                 />
+
+               
 
 
             </Tab.Navigator>

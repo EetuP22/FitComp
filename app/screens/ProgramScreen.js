@@ -5,7 +5,7 @@ import { Text, TextInput, Button, Card } from 'react-native-paper';
 
 
 
-export default function ProgramScreen() {
+export default function ProgramScreen({ navigation}) {
     const [ programs, setPrograms ] = useState([]);
     const [ programName, setProgramName ] = useState('');
     const [ programDesc, setProgramDesc ] = useState('');
@@ -31,9 +31,9 @@ export default function ProgramScreen() {
 
     // myöhemmin lisätään navigointi yksityiskohtiin.
     const openProgram = (program) => {
-        console.log('Avaa ohjelma:', program);
+        navigation.navigate('ProgramDetail', { program });
     }
-
+    
     const renderProgram = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.programName} subtitle={item.programDesc || 'Ei kuvausta'} />
