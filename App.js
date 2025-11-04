@@ -1,13 +1,16 @@
-import * as React from 'react';
+import React from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import MainNavigator from './app/navigation/MainNavigator';
 import { theme } from './app/styles/theme';
+import { ProgramProvider } from './app/context/ProgramContext';
 
 
 export default function App() {
   return (
     <PaperProvider theme={theme}>
-      <MainNavigator />
+      <ProgramProvider>
+        <MainNavigator />
+      </ProgramProvider>
     </PaperProvider>
   );
 }
