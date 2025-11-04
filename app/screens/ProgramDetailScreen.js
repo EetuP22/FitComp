@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Card, Button, TextInput, Text } from 'react-native-paper';
 import CustAppBar from '../components/CustAppBar';
+import { useNavigation } from '@react-navigation/native';
 
-export default function ProgramDetailScreen({ route, navigation }) {
+export default function ProgramDetailScreen({ route }) {
     const { program } = route.params;
     const [days, setDays] = useState([]);
     const [dayName, setDayName] = useState('');
+    const navigation = useNavigation();
 
     const addDay = () => {
         if (dayName.trim() === '') return;
@@ -14,6 +16,7 @@ export default function ProgramDetailScreen({ route, navigation }) {
         const newDay = {
             id: Date.now().toString(),
             name: dayName.trim(),
+            exercises: [], //Myöhempää varten
         };
 
         setDays([...days, newDay]);
@@ -24,10 +27,17 @@ export default function ProgramDetailScreen({ route, navigation }) {
         setDays(days.filter((d) => d.id !== id));
     };
 
+    const openDay = (day) => {
+        navigation.navigate('DayDetail', { day });
+    };
+
     const renderDay = ({ item }) => (
         <Card style={styles.card}>
             <Card.Title title={item.name} />
             <Card.Actions style={styles.cardActions}>
+                <Button mode='outlined' onPress={() => openDay(item)}>
+                    Avaa
+                </Button>
                 <Button mode='text' textColor='#e53935' onPress={() => deleteDay(item.id)}>
                     Poista
                 </Button>
