@@ -11,22 +11,22 @@ export default function ProgramScreen({ navigation}) {
     const [ programDesc, setProgramDesc ] = useState('');
 
 
-      const handleAddProgram = () => {
-    if (programName.trim() === '') return;
-    addProgram(programName, programDesc);
-    setProgramName('');
-    setProgramDesc('');
+    const handleAddProgram = () => {
+      if (programName.trim() === '') return;
+      addProgram(programName, programDesc);
+      setProgramName('');
+      setProgramDesc('');
   };
 
-  const openProgram = (program) => {
-    navigation.navigate('ProgramDetail', { program });
+   const openProgram = (programId) => {
+    navigation.navigate('ProgramDetail', { programId });
   };
 
   const renderProgram = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.name} subtitle={item.desc || 'Ei kuvausta'} />
       <Card.Actions style={styles.cardActions}>
-        <Button mode="outlined" onPress={() => openProgram(item)}>Avaa</Button>
+        <Button mode="outlined" onPress={() => openProgram(item.id)}>Avaa</Button>
         <Button mode="text" onPress={() => deleteProgram(item.id)} textColor="#e53935">Poista</Button>
       </Card.Actions>
     </Card>

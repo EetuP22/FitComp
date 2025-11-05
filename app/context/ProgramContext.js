@@ -89,6 +89,15 @@ export const ProgramProvider = ({ children }) => {
         );
     };
 
+const getProgramById = (programId) => {
+  return programs.find((p) => p.id === programId);
+};
+
+const getDayById = (programId, dayId) => {
+  const program = getProgramById(programId);
+  return program?.days.find((d) => d.id === dayId);
+};
+
     return (
         <ProgramContext.Provider
             value={{
@@ -99,6 +108,8 @@ export const ProgramProvider = ({ children }) => {
                 deleteDay,
                 addExercise,
                 deleteExercise,
+                getProgramById,
+                getDayById,
             }}
         >
             {children}
