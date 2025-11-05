@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Card, Button, TextInput, Text } from 'react-native-paper';
-import CustAppBar from '../components/CustAppBar';
 import { useNavigation } from '@react-navigation/native';
 import { useProgram } from '../context/ProgramContext';
 
@@ -45,7 +44,6 @@ export default function ProgramDetailScreen({ route }) {
 
     return (
     <View style={styles.container}>
-      <CustAppBar title={program.programName} />
       <View style={styles.content}>
         <Text style={styles.subtitle}>
           {program.programDesc || 'Ei kuvausta tälle ohjelmalle'}

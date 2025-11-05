@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import CustAppBar from '../components/CustAppBar';
 import { Text, TextInput, Button, Card } from 'react-native-paper';
 import { useProgram } from '../context/ProgramContext';
 
@@ -33,7 +32,6 @@ export default function ProgramScreen({ navigation}) {
   );
      return (
     <View style={styles.container}>
-      <CustAppBar title="Treeniohjelmat" />
       <View style={styles.content}>
         <Text style={styles.text}>Luo uusi ohjelma 🏋️‍♂️</Text>
 
