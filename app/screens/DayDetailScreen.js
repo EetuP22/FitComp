@@ -9,8 +9,13 @@ export default function DayDetailScreen({ route }) {
   const day = getDayById(programId, dayId);
   const [exerciseName, setExerciseName] = useState('');
 
-  if (!day) return <Text>Päivää ei löytynyt.</Text>;
-
+  if (!day) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>Virhe: Päivää ei löytynyt.</Text>
+      </View>
+    );
+  }
   const handleAddExercise = () => {
     if (!exerciseName.trim()) return;
     addExercise(programId, dayId, exerciseName.trim());
@@ -34,6 +39,7 @@ export default function DayDetailScreen({ route }) {
 
   return (
     <View style={styles.container}>
+        <Text style={styles.title}>{day.name}</Text>
       <View style={styles.content}>
         <Text style={styles.subtitle}>Lisää harjoituksia tälle päivälle 🏋️</Text>
         <TextInput
@@ -66,6 +72,15 @@ export default function DayDetailScreen({ route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fafafa',
+  },
   content: { flex: 1, padding: 16 },
   subtitle: { fontSize: 16, marginBottom: 12, color: '#555' },
   input: { marginBottom: 10 },
