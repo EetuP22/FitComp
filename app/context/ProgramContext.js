@@ -4,6 +4,7 @@ const ProgramContext = createContext();
 
 export const ProgramProvider = ({ children }) => {
     const [programs, setPrograms] = useState([]);
+    const [selectedDays, setSelectedDays] = useState([]);
 
     const addProgram = (programName, programDesc = '') => {
 
@@ -98,6 +99,16 @@ const getDayById = (programId, dayId) => {
   return program?.days.find((d) => d.id === dayId);
 };
 
+const assignDayToDate = (dateString, programId, dayId) => {
+    setSelectedDays((prev) => ({
+        ...prev,
+        [dateString]: { programId, dayId },
+    }));
+
+};
+
+const getAssignedDay = (dateString) => selectedDays[dateString];
+
     return (
         <ProgramContext.Provider
             value={{
@@ -110,6 +121,10 @@ const getDayById = (programId, dayId) => {
                 deleteExercise,
                 getProgramById,
                 getDayById,
+
+                selectedDays,
+                assignDayToDate,
+                getAssignedDay,
             }}
         >
             {children}

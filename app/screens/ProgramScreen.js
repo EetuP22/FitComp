@@ -18,7 +18,7 @@ export default function ProgramScreen({ navigation}) {
   };
 
    const openProgram = (programId) => {
-    navigation.navigate('ProgramDetail', { programId });
+    navigation.navigate('ProgramDetail', {programId});
   };
 
   const renderProgram = ({ item }) => (

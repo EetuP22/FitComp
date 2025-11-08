@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Modal } from 'react-native';
 import CustAppBar from '../components/CustAppBar';
 import { Calendar } from 'react-native-calendars';
-import { TextInput, Button, Card } from 'react-native-paper';
+import { Button, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import { useProgram } from '../context/ProgramContext';
 
 export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = React.useState('');
-    const [workoutName, setWorkoutName] = useState('');
-    const [workouts, setWorkouts] = useState([]);
+    const [ modalVisible, setModalVisible ] = useState(false);
+
+
     const navigation = useNavigation();
+    const { programs, getAssignedDay, assignDayToDate } = useProgram();
 
+    const assigned = selectedDate ? getAssignedDay(selectedDate) : null;
 
-    const addWorkout = () => {
-        if (!selectedDate || !workoutName.trim() === '') return;
-        const newWorkout = { date: selectedDate, name: workoutName.trim() };
-        setWorkouts((prev) => [...prev, newWorkout]);
-        setWorkoutName('');
-    }
-
-    const goToProgram = (workout) => {
-        navigation.navigate('Programs', { workout });
+    const openDay = () => {
+      navigation.navigate('Programs', {
+        screen: 'DayDetail',
+        params: {
+          programId: assigned.programId,
+          dayId: assigned.dayId,
+        },
+      })
     };
 
 
@@ -41,48 +43,61 @@ export default function CalendarScreen() {
       />
 
       <View style={styles.content}>
-        {selectedDate ? (
-            <>
-            <Text style={styles.text}>Valittu päivä: {selectedDate}</Text>
-
-            <TextInput
-                label="Treenin nimi"
-                value={workoutName}
-                onChangeText={setWorkoutName}
-                mode='outlines'
-                style={styles.input}
-                />
-
-            <Button mode="contained" onPress={addWorkout} style={styles.button}>
-                Lisää treeni
+        {!selectedDate ? (
+          <Text style={styles.text}>Valitse päivä kalenterista 📅</Text>
+        ) : assigned ? (
+          <>
+            <Text style={styles.text}>Tälle päivälle on liitetty treenipäivä ✅</Text>
+            <Button mode="contained" onPress={openDay}>
+              Avaa liitetty treeni
             </Button>
+          </>
+        ) : (
+          <>
+            <Text style={styles.text}>Ei liitettyä treeniä. Valitse ohjelmapäivä:</Text>
 
-             <FlatList
-              data={workouts.filter((w) => w.date === selectedDate)}
-              keyExtractor={(item, index) => index.toString()}
+            <Button mode="contained" onPress={() => setModalVisible(true)}>
+              Valitse ohjelmapäivä
+            </Button>
+          </>
+        )}
+      </View>
+
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.modal}>
+          <View style={styles.modalContent}>
+            <Text style={styles.text}>Valitse ohjelmapäivä:</Text>
+
+              <FlatList
+              data={programs.flatMap((p) =>
+                p.days.map((d) => ({ ...d, programId: p.id, programName: p.name }))
+              )}
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <Card style={styles.card}>
                   <Card.Title
-                    title={item.name}
-                    subtitle={`Päivä: ${item.date}`}
-                    right={(props) => (
+                    title={`${item.programName} — ${item.name}`}
+                    right={() => (
                       <Button
-                        onPress={() => goToProgram(item)}
-                        compact
-                        mode="text"
+                        onPress={() => {
+                          assignDayToDate(selectedDate, item.programId, item.id);
+                          setModalVisible(false);
+                        }}
                       >
-                        Avaa
+                        Valitse
                       </Button>
                     )}
                   />
                 </Card>
               )}
             />
-          </>
-        ) : (
-          <Text style={styles.text}>Valitse päivä kalenterista 📅</Text>
-        )}
-      </View>
+
+            <Button mode="text" onPress={() => setModalVisible(false)}>
+              Sulje
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -94,4 +109,6 @@ const styles = StyleSheet.create({
   input: { marginBottom: 10 },
   button: { marginBottom: 16 },
   card: { marginVertical: 6 },
+  modal: {flex: 1, justifyContent: 'center', backgroundColor: '#00000055'},
+  modalContent: {backgroundColor: '#fff', margin: 20, padding: 20, borderRadius: 8 },
 });
