@@ -2,31 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Text, TextInput, Button, Card } from 'react-native-paper';
 import { useProgram } from '../context/ProgramContext';
-import { addProgram as dbAddProgram, getPrograms as dbGetPrograms } from '../db/database';
 
 
 export default function ProgramScreen({ navigation}) {
-  const { deleteProgram } = useProgram();
-  const [ programs, setPrograms ] = useState([]);
+  const { programs, deleteProgram, addProgram } = useProgram();
   const [ programName, setProgramName ] = useState('');
   const [ programDesc, setProgramDesc ] = useState('');
 
-    useEffect(() => {
-      loadPrograms();
-    }, []);
+   
 
-    const loadPrograms = async () => {
-      const data = await dbGetPrograms();
-      setPrograms(data);
-    };
-
-    const handleAddProgram = async () => {
+    const handleAddProgram = () => {
       if (programName.trim() === '') return;
-
-    await dbAddProgram(Date.now().toString(), programName.trim(), programDesc.trim());
+      addProgram(programName, programDesc);
       setProgramName('');
       setProgramDesc('');
-      loadPrograms(); 
     };
 
   const openProgram = (programId) => {
@@ -36,10 +25,14 @@ export default function ProgramScreen({ navigation}) {
 
   const renderProgram = ({ item }) => (
     <Card style={styles.card}>
-      <Card.Title title={item.name} subtitle={item.description || 'Ei kuvausta'} />
+      <Card.Title title={item.name} subtitle={item.desc || 'Ei kuvausta'} />
       <Card.Actions style={styles.cardActions}>
-        <Button mode="outlined" onPress={() => openProgram(item.id)}>Avaa</Button>
-        <Button mode="text" onPress={() => deleteProgram(item.id)} textColor="#e53935">Poista</Button>
+        <Button mode="outlined" onPress={() => openProgram(item.id)}>
+          Avaa
+        </Button>
+        <Button mode="text" onPress={() => deleteProgram(item.id)} textColor="#e53935">
+          Poista
+        </Button>
       </Card.Actions>
     </Card>
   );
