@@ -46,7 +46,7 @@ export default function ProgramDetailScreen({ route }) {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.subtitle}>
-          {program.programDesc || 'Ei kuvausta tälle ohjelmalle'}
+          {program.desc || 'Ei kuvausta tälle ohjelmalle'}
         </Text>
         <TextInput
           label="Lisää treenipäivä (esim. Yläkroppa)"

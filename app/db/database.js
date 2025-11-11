@@ -6,12 +6,21 @@ export const initDatabase = async () => {
     try {
         db = await SQLite.openDatabaseAsync('fitcomp.db');
 
-        await db.execAsync(`
+    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS programs (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT
       );
+    `);
+
+    await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS days (
+        id TEXT PRIMARY KEY,
+        programId TEXT NOT NULL,
+        name TEXT NOT NULL,
+        FOREIGN KEY (programId) REFERENCES programs(id)
+    );
     `);
 
     console.log("✅ FitComp SQLite tietokanta alustettu");
@@ -51,5 +60,37 @@ export const deleteProgram = async (id) => {
         await db.runAsync('DELETE FROM programs WHERE id = ?;', [id]);
     } catch (error) {
         console.log("❌ Virhe poistettaessa ohjelmaa:", error);
+    }
+};
+
+export const getDaysByProgram = async (programId) => {
+    if (!db) return [];
+    try {
+        return await db.getAllAsync('SELECT * FROM days WHERE programId = ?;', [programId]);
+    } catch (error) {
+        console.log("❌ Virhe haettaessa päiviä ohjelmalle:", error);
+        return [];
+    }
+};
+
+export const addDayToDb = async (id, programId, name) => {
+    if (!db) return;
+    try {
+        await db.runAsync(
+        'INSERT INTO days (id, programId, name) VALUES (?, ?, ?);',
+        [id, programId, name]
+        );
+    } catch (error) {
+        console.log("❌ Virhe lisättäessä päivää:", error);
+    }
+};
+
+
+export const deleteDayFromDb = async (id) => {
+    if (!db) return;
+    try {
+        await db.runAsync('DELETE FROM days WHERE id = ?;', [id]);
+    } catch (error) {
+        console.log("❌ Virhe poistettaessa päivää:", error);
     }
 };
