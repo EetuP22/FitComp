@@ -16,7 +16,7 @@ export default function DayDetailScreen({ route }) {
       </View>
     );
   }
-  const handleAddExercise = () => {
+  const handleAddExercise = async () => {
     if (!exerciseName.trim()) return;
     addExercise(programId, dayId, exerciseName.trim());
     setExerciseName('');

@@ -6,7 +6,10 @@ import {
   deleteProgram as dbDeleteProgram,
   getDaysByProgram,
   addDayToDb,
-  deleteDayFromDb
+  deleteDayFromDb,
+  getExercisesByDay,
+  addExerciseToDb,
+  deleteExerciseFromDb,
 } from '../db/database';
 
 const ProgramContext = createContext();
@@ -30,15 +33,16 @@ export const ProgramProvider = ({ children }) => {
       const loadedPrograms = [];
       for (const p of rows) {
         const days = await getDaysByProgram(p.id); 
+        const daysWithExercises = [];
+        for (const d of days) {
+            const exercises = await getExercisesByDay(d.id);
+            daysWithExercises.push({ id: d.id, name: d.name, exercises });
+        }
         loadedPrograms.push({
           id: p.id,
           name: p.name,
           desc: p.description || '',
-          days: days.map((d) => ({
-            id: d.id,
-            name: d.name,
-            exercises: []
-          }))
+          days: daysWithExercises,
         });
       }
       setPrograms(loadedPrograms);
@@ -99,14 +103,19 @@ export const ProgramProvider = ({ children }) => {
   };
 
 
-  const addExercise = (programId, dayId, exerciseName) => {
+  const addExercise = async (programId, dayId, exerciseName) => {
+    const newId = Date.now().toString();
+    const name = exerciseName.trim();
+
+    await addExerciseToDb(newId, dayId, name);
+
     setPrograms((prev) =>
       prev.map((p) =>
         p.id === programId
           ? {
               ...p,
               days: p.days.map((d) =>
-                d.id === dayId ? { ...d, exercises: [...d.exercises, { id: Date.now().toString(), name: exerciseName.trim() }] } : d
+                d.id === dayId ? { ...d, exercises: [...d.exercises, { id: newId, name }] } : d
               ),
             }
           : p
@@ -114,11 +123,22 @@ export const ProgramProvider = ({ children }) => {
     );
   };
 
-  const deleteExercise = (programId, dayId, exerciseId) => {
-    setPrograms((prev) =>
+  const deleteExercise = async (programId, dayId, exerciseId) => {
+    await deleteExerciseFromDb(exerciseId);
+   setPrograms((prev) =>
       prev.map((p) =>
         p.id === programId
-          ? { ...p, days: p.days.map((d) => (d.id === dayId ? { ...d, exercises: d.exercises.filter((e) => e.id !== exerciseId) } : d)) }
+          ? {
+              ...p,
+              days: p.days.map((d) =>
+                d.id === dayId
+                  ? {
+                      ...d,
+                      exercises: d.exercises.filter((e) => e.id !== exerciseId),
+                    }
+                  : d
+              ),
+            }
           : p
       )
     );
