@@ -32,6 +32,8 @@ export const initDatabase = async () => {
     );
 `);
 
+    await createCalendarTable();
+
 
     console.log("✅ FitComp SQLite tietokanta alustettu");
   } catch (error) {
@@ -135,5 +137,44 @@ export const deleteExerciseFromDb = async (id) => {
         await db.runAsync('DELETE FROM exercises WHERE id = ?;', [id]);
     } catch (error) {
         console.log("❌ Virhe poistettaessa harjoitusta:", error);
+    }
+};
+
+export const createCalendarTable = async () => {
+    if (!db) return;
+    try  {
+        await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS calendar_entries (
+            date TEXT PRIMARY KEY,
+            programId TEXT,
+            dayId TEXT,
+            FOREIGN KEY (programId) REFERENCES programs(id),
+            FOREIGN KEY (dayId) REFERENCES days(id)
+        );
+        `);
+    } catch (error) {
+        console.log("❌ Virhe luotaessa kalenteritaulua:", error);
+    }
+};
+
+export const dbAssignDayToDate = async (date, programId, dayId) => {
+    if (!db) return;
+    try {
+        await db.runAsync(
+        `INSERT OR REPLACE INTO calendar_entries (date, programId, dayId) VALUES (?, ?, ?);`,
+        [date, programId, dayId]
+        );
+    } catch (error) {
+        console.log("❌ Virhe kalenterimerkintää lisättäessä:", error);
+    }
+};
+
+export const getCalendarEntries = async () => {
+    if (!db) return [];
+    try {
+        return await db.getAllAsync('SELECT * FROM calendar_entries;');
+    } catch (error) {
+        console.log("❌ Virhe haettaessa kalenterimerkintöjä:", error);
+        return [];
     }
 };

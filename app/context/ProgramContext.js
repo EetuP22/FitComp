@@ -10,6 +10,8 @@ import {
   getExercisesByDay,
   addExerciseToDb,
   deleteExerciseFromDb,
+  dbAssignDayToDate,
+  getCalendarEntries,
 } from '../db/database';
 
 const ProgramContext = createContext();
@@ -22,9 +24,23 @@ export const ProgramProvider = ({ children }) => {
     const initAndLoad = async () => {
       await initDatabase(); 
       await loadProgramsFromDb();
+      await loadCalendarFromDb();
     };
     initAndLoad();
   }, []);
+
+  const loadCalendarFromDb = async () => {
+    try {
+        const entries = await getCalendarEntries();
+        const mapped = {};
+        entries.forEach((e) => {
+            mapped[e.date] = { programId: e.programId, dayId: e.dayId };
+        });
+        setSelectedDays(mapped);
+    } catch (err) {
+        console.error('loadCalendarFromDb error', err);
+    }
+  };
 
    const loadProgramsFromDb = async () => {
     try {
@@ -148,8 +164,17 @@ export const ProgramProvider = ({ children }) => {
 
   const getDayById = (programId, dayId) => getProgramById(programId)?.days.find((d) => d.id === dayId);
 
-  const assignDayToDate = (dateString, programId, dayId) =>
-    setSelectedDays((prev) => ({ ...prev, [dateString]: { programId, dayId } }));
+ const assignDayToDate = async (dateString, programId, dayId) => {
+    try {
+      await dbAssignDayToDate(dateString, programId, dayId);
+      setSelectedDays((prev) => ({
+        ...prev,
+        [dateString]: { programId, dayId },
+      }));
+    } catch (err) {
+      console.error('assignDayToDate error', err);
+    }
+  };
 
   const getAssignedDay = (dateString) => selectedDays[dateString];
 

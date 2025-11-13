@@ -17,15 +17,12 @@ export default function CalendarScreen() {
     const assigned = selectedDate ? getAssignedDay(selectedDate) : null;
 
     const openDay = () => {
-      navigation.navigate('Programs', {
-        screen: 'DayDetail',
-        params: {
-          programId: assigned.programId,
-          dayId: assigned.dayId,
-        },
-      })
+      if (!assigned) return;
+      navigation.navigate('DayDetailModal', {
+        programId: assigned.programId,
+        dayId: assigned.dayId,
+      });
     };
-
 
   return (
     <View style={styles.container}>

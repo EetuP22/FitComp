@@ -2,14 +2,32 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import MapScreen from '../screens/MapScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import ExerciseScreen from '../screens/ExerciseScreen';
 import ProgramStack from './ProgramStack';
+import DayDetailScreen from '../screens/DayDetailScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+function CalendarWithDayModal() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: true }}>
+      <Stack.Screen name="CalendarMain" component={CalendarScreen} />
+      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+        <Stack.Screen 
+          name="DayDetailModal" 
+          component={DayDetailScreen}
+          options={{ title: 'Treenipäivä', }}
+        />
+      </Stack.Group>
+    </Stack.Navigator>
+  );
+}
 
 export default function MainNavigator() {
     return (
@@ -45,7 +63,7 @@ export default function MainNavigator() {
                     />
                 <Tab.Screen
                     name="Calendar"
-                    component={CalendarScreen}
+                    component={CalendarWithDayModal}
                     options={{
                         tabBarLabel: 'Calendar',
                         tabBarIcon: ({ color, size }) => (

@@ -13,6 +13,8 @@ export default function ProgramDetailScreen({ route }) {
 
     if (!program) return <Text>Ohjelmaa ei löytynyt.</Text>;
 
+  
+
   const handleAddDay = () => {
     if (!dayName.trim()) return;
     addDay(programId, dayName.trim());
