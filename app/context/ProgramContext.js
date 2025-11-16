@@ -12,6 +12,9 @@ import {
   deleteExerciseFromDb,
   dbAssignDayToDate,
   getCalendarEntries,
+  dbDeleteCalendarEntry,
+  dbMarkCalendarEntryAsDone,
+  dbUpdateCalendarNotes
 } from '../db/database';
 
 const ProgramContext = createContext();
@@ -22,7 +25,6 @@ export const ProgramProvider = ({ children }) => {
 
   useEffect(() => {
     const initAndLoad = async () => {
-      await initDatabase(); 
       await loadProgramsFromDb();
       await loadCalendarFromDb();
     };
@@ -34,7 +36,12 @@ export const ProgramProvider = ({ children }) => {
         const entries = await getCalendarEntries();
         const mapped = {};
         entries.forEach((e) => {
-            mapped[e.date] = { programId: e.programId, dayId: e.dayId };
+        mapped[e.date] = {
+            programId: e.programId,
+            dayId: e.dayId,
+            done: e.done === 1 || e.done === true, 
+            notes: e.notes
+};
         });
         setSelectedDays(mapped);
     } catch (err) {
@@ -107,6 +114,8 @@ export const ProgramProvider = ({ children }) => {
 
   const deleteDay = async (programId, dayId) => {
     await deleteDayFromDb(dayId);
+    await dbDeleteCalendarEntryByDayId(dayId);
+    await loadCalendarFromDb();
 
     setPrograms((prev) =>
          prev.map((p) =>
@@ -160,6 +169,8 @@ export const ProgramProvider = ({ children }) => {
     );
   };
 
+ 
+
   const getProgramById = (programId) => programs.find((p) => p.id === programId);
 
   const getDayById = (programId, dayId) => getProgramById(programId)?.days.find((d) => d.id === dayId);
@@ -178,6 +189,22 @@ export const ProgramProvider = ({ children }) => {
 
   const getAssignedDay = (dateString) => selectedDays[dateString];
 
+   const deleteCalendarEntry = async (date) => {
+    await dbDeleteCalendarEntry(date);
+    await loadCalendarFromDb();
+  };
+
+  const markCalendarEntryAsDone = async (date) => {
+    await dbMarkCalendarEntryAsDone(date);
+    await loadCalendarFromDb();
+  };
+
+  const updateCalendarNotes = async (date, notes) => {
+    await dbUpdateCalendarNotes(date, notes);
+    await loadCalendarFromDb();
+  };
+
+
   return (
     <ProgramContext.Provider
       value={{
@@ -193,6 +220,10 @@ export const ProgramProvider = ({ children }) => {
         selectedDays,
         assignDayToDate,
         getAssignedDay,
+        loadCalendarFromDb,
+        deleteCalendarEntry,
+        markCalendarEntryAsDone,
+        updateCalendarNotes,
       }}
     >
       {children}

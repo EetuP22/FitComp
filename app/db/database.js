@@ -41,6 +41,9 @@ export const initDatabase = async () => {
   }
 };
 
+export const getDb = () => db;
+
+
 export const getPrograms = async () => {
     if (!db) return [];
     try {
@@ -148,6 +151,8 @@ export const createCalendarTable = async () => {
             date TEXT PRIMARY KEY,
             programId TEXT,
             dayId TEXT,
+            done INTEGER DEFAULT 0,
+            notes TEXT,
             FOREIGN KEY (programId) REFERENCES programs(id),
             FOREIGN KEY (dayId) REFERENCES days(id)
         );
@@ -161,8 +166,8 @@ export const dbAssignDayToDate = async (date, programId, dayId) => {
     if (!db) return;
     try {
         await db.runAsync(
-        `INSERT OR REPLACE INTO calendar_entries (date, programId, dayId) VALUES (?, ?, ?);`,
-        [date, programId, dayId]
+            `INSERT OR REPLACE INTO calendar_entries (date, programId, dayId, done, notes) VALUES (?, ?, ?, COALESCE((SELECT done FROM calendar_entries WHERE date = ?), 0), COALESCE((SELECT notes FROM calendar_entries WHERE date = ?), ''));`,
+            [date, programId, dayId, date, date]
         );
     } catch (error) {
         console.log("❌ Virhe kalenterimerkintää lisättäessä:", error);
@@ -176,5 +181,43 @@ export const getCalendarEntries = async () => {
     } catch (error) {
         console.log("❌ Virhe haettaessa kalenterimerkintöjä:", error);
         return [];
+    }
+};
+
+export const dbDeleteCalendarEntry = async (date) => {
+    if (!db) return;
+    try {
+        await db.runAsync('DELETE FROM calendar_entries WHERE date = ?;', [date]);
+    } catch (error) {
+        console.log("❌ Virhe poistettaessa kalenterimerkintää:", error);
+    }
+};
+
+
+export const dbDeleteCalendarEntryByDayId = async (dayId) => {
+    if (!db) return;
+    try {
+        await db.runAsync('DELETE FROM calendar_entries WHERE dayId = ?;', [dayId]);
+    } catch (error) {
+        console.log("❌ Virhe poistettaessa kalenterimerkintää:", error);
+    }
+};
+
+export const dbMarkCalendarEntryAsDone = async (date) => {
+    if (!db) return;
+    try {
+        await db.runAsync('UPDATE calendar_entries SET done = 1 WHERE date = ?;', [date]);
+        console.log("✅ Kalenterimerkintä merkitty tehdyksi päivälle:", date);
+    } catch (error) {
+        console.log("❌ Virhe merkittäessä kalenteripäivää tehdyksi:", error);
+    }
+};
+
+export const dbUpdateCalendarNotes = async (date, notes) => {
+    if (!db) return;
+    try {
+        await db.runAsync('UPDATE calendar_entries SET notes = ? WHERE date = ?;', [notes, date]);
+    } catch (error) {
+        console.log("❌ Virhe päivitettäessä muistiinpanoja:", error);
     }
 };
