@@ -1,6 +1,5 @@
 import React from "react";
 import { Appbar } from "react-native-paper";
-import App from "../../App";
 
 const CustAppBar = ({ title, backAction, onMenuPress }) => {
     return (

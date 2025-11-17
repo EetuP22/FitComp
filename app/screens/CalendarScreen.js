@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, Modal, ScrollView } from 'react-native';
 import CustAppBar from '../components/CustAppBar';
 import { Calendar } from 'react-native-calendars';
 import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { useProgram } from '../context/ProgramContext';
+import { useProgram } from '../context/ProgramProvider';
+import { useCalendar } from '../context/CalendarProvider';
 
 export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = React.useState('');
@@ -12,24 +13,39 @@ export default function CalendarScreen() {
     const [ note, setNote ] = useState('');
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const [marking, setMarking] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+
+  const [localIsDone, setLocalIsDone] = useState(false);
     
 
     const navigation = useNavigation();
-    const { programs, getAssignedDay, assignDayToDate, selectedDays, deleteCalendarEntry, markCalendarEntryAsDone, updateCalendarNotes } = useProgram();
+    const { programs } = useProgram();
+    const {
+      getAssignedDay,
+      assignDayToDate,
+      selectedDays,
+      deleteCalendarEntry,
+      deleteCalendarEntryByDayId,
+      markCalendarEntryAsDone,
+      updateCalendarNotes,
+    } = useCalendar();
 
     useEffect(() => {
       if (!selectedDate) {
         setNote('');
         return;
       }
-      const assigned = getAssignedDay(selectedDate);
-      setNote(assigned?.notes ?? '');
-    }, [selectedDate, selectedDays]);
+    const assigned = getAssignedDay(selectedDate);
+    setNote(assigned?.notes ?? '');
+    setLocalIsDone(Boolean(assigned?.done === 1 || assigned?.done === true));
+  }, [selectedDate, selectedDays]);
 
-    const assigned = selectedDate ? getAssignedDay(selectedDate) : null;
-    const isDone = selectedDate && selectedDays[selectedDate]
-      ? selectedDays[selectedDate].done === 1 || selectedDays[selectedDate].done === true
-      : false;
+  const assigned = selectedDate ? getAssignedDay(selectedDate) : null;
+  const isDone = localIsDone;
 
     const openDay = () => {
       if (!assigned) return;
@@ -41,34 +57,74 @@ export default function CalendarScreen() {
 
     const handleDeleteCalendarLog = async () => {
         if (!assigned) return;
-        await deleteCalendarEntry(selectedDate);
-        setSelectedDate('');
-        setNote('');
-        setSnackbarMessage('Kalenterimerkintä poistettu!');
-        setSnackbarVisible(true);
-    };
+        setDeleting(true);
+        try {
+          await deleteCalendarEntry(selectedDate);
+          setSelectedDate('');
+          setNote('');
+          setSnackbarMessage('Kalenterimerkintä poistettu!');
+          setSnackbarVisible(true);
+      } finally {
+        setDeleting(false);
+      }
+     };
 
     const handleMarkDayAsDone = async () => {
         if (!selectedDate) return;
-        await markCalendarEntryAsDone(selectedDate);
-        setSnackbarMessage('Treeni merkitty tehdyksi! ✅');
-        setSnackbarVisible(true);
-        
+        setLocalIsDone(true);
+        setMarking(true);
+        try {
+          await markCalendarEntryAsDone(selectedDate);
+          setSnackbarMessage('Treeni merkitty tehdyksi! ✅');
+          setSnackbarVisible(true);
+      } finally {
+        setMarking(false);
+      }
     };
 
     const handleSaveNote = async () => {
         if (!selectedDate) return;
-        await updateCalendarNotes(selectedDate, note);
-        setSnackbarMessage('Muistiinpanot tallennettu!');
-        setSnackbarVisible(true);
+        setSavingNote(true);
+        try {
+          await updateCalendarNotes(selectedDate, note);
+          setSnackbarMessage('Muistiinpanot tallennettu!');
+          setSnackbarVisible(true);
+      } finally {
+        setSavingNote(false);
+      }
     };
 
     const onSelectProgramDay = async (date, programId, dayId) => {
+      setAssigning(true);
+      try {
         await assignDayToDate(date, programId, dayId);
         setModalVisible(false);
         const assignedNow = getAssignedDay(date);
         setNote(assignedNow?.notes ?? '');
+        setLocalIsDone(Boolean(assignedNow?.done === 1 || assignedNow?.done === true));
+      } finally {
+        setAssigning(false);
+      }
     };
+
+    const markedDates = useMemo(() => {
+    const map = {};
+    Object.keys(selectedDays || {}).forEach((d) => {
+      const entry = selectedDays[d];
+      map[d] = {
+        marked: true,
+        dotColor: entry.done ? '#4CAF50' : '#2196f3',
+      };
+    });
+    if (selectedDate) {
+      map[selectedDate] = {
+        ...(map[selectedDate] || {}),
+        selected: true,
+        selectedColor: isDone ? '#4CAF50' : '#2196f3',
+      };
+    }
+    return map;
+  }, [selectedDays, selectedDate, isDone]);
 
   return (
     <View style={styles.container}>
@@ -76,12 +132,10 @@ export default function CalendarScreen() {
 
       <Calendar
         onDayPress={(day) => setSelectedDate(day.dateString)}
-        markedDates={{
-            [selectedDate]: {selected: true, selectedColor: '#2196f3'},
-        }}
+        markedDates={markedDates}
         theme={{
-            todayTextColor: '#e91e63',
-            arrowColor: '#2196f3',
+          todayTextColor: '#e91e63',
+          arrowColor: '#2196f3',
         }}
         style={styles.calendar}
       />
@@ -93,7 +147,13 @@ export default function CalendarScreen() {
           <>
             <Text style={styles.text}>Tälle päivälle on liitetty treenipäivä ✅</Text>
 
-            <Button mode="contained" onPress={openDay} icon="dumbbell" style={styles.button}>
+            <Button
+              mode="contained"
+              onPress={openDay}
+              icon="dumbbell"
+              style={styles.button}
+              disabled={marking || savingNote || deleting || assigning}
+            >
               Avaa liitetty treeni
             </Button>
 
@@ -101,6 +161,8 @@ export default function CalendarScreen() {
               mode="contained"
               onPress={handleMarkDayAsDone}
               icon="check-circle"
+              loading={marking}
+              disabled={marking || isDone}
               buttonColor={isDone ? '#4CAF50' : undefined} 
               style={styles.button}
             >
@@ -109,20 +171,35 @@ export default function CalendarScreen() {
                       
 
             <TextInput
-             label="Lisää muistiinpano"
-             value={note}
-             onChangeText={setNote}
+              label="Lisää muistiinpano"
+              value={note}
+              onChangeText={setNote}
               mode="outlined"
               style={styles.input}
               multiline
               numberOfLines={3}
             />
 
-            <Button mode="outlined" onPress={handleSaveNote} style={styles.button} icon="content-save">
+            <Button
+             mode="outlined"
+             onPress={handleSaveNote}
+             style={styles.button}
+             icon="content-save"
+             loading={savingNote}
+             disabled={savingNote || marking || assigning}
+            >
               Tallenna muistiinpano
             </Button>
 
-            <Button mode="text" onPress={handleDeleteCalendarLog} textColor="#e53935" style={styles.deleteButton} icon="trash-can">
+            <Button 
+            mode="text"
+            onPress={handleDeleteCalendarLog}
+            textColor="#e53935" 
+            style={styles.deleteButton} 
+            icon="trash-can"
+            loading={deleting}
+            disabled={deleting || assigning || marking}
+            >
               Poista liitetty treeni
             </Button>
           </>
@@ -130,7 +207,14 @@ export default function CalendarScreen() {
           <>
             <Text style={styles.text}>Ei liitettyä treeniä. Valitse ohjelmapäivä:</Text>
 
-            <Button mode="contained" onPress={() => setModalVisible(true)} style={styles.button} icon="plus-circle">
+            <Button 
+            mode="contained" 
+            onPress={() => setModalVisible(true)} 
+            style={styles.button} 
+            icon="plus-circle"
+            loading={assigning}
+            disabled={assigning}
+            >
               Valitse ohjelmapäivä
             </Button>
           </>

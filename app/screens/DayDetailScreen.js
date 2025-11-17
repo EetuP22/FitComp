@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Card, Button, TextInput, Text } from 'react-native-paper';
-import { useProgram } from '../context/ProgramContext';
+import { useProgram } from '../context/ProgramProvider';
 
 export default function DayDetailScreen({ route }) {
   const { programId, dayId } = route.params;

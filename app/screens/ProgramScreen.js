@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { Text, TextInput, Button, Card } from 'react-native-paper';
-import { useProgram } from '../context/ProgramContext';
+import React, { useState } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
+import { useProgram } from '../context/ProgramProvider';
 
 
 export default function ProgramScreen({ navigation}) {
-  const { programs, deleteProgram, addProgram } = useProgram();
+  const { programs, deleteProgram, addProgram, loading, error } = useProgram();
   const [ programName, setProgramName ] = useState('');
   const [ programDesc, setProgramDesc ] = useState('');
 
@@ -17,6 +17,10 @@ export default function ProgramScreen({ navigation}) {
       setProgramName('');
       setProgramDesc('');
     };
+
+    const handleDeleteProgram = (programId) => {
+      deleteProgram(programId);
+    }
 
   const openProgram = (programId) => {
     navigation.navigate('ProgramDetail', { programId });
@@ -30,20 +34,47 @@ export default function ProgramScreen({ navigation}) {
         <Button mode="outlined" onPress={() => openProgram(item.id)}>
           Avaa
         </Button>
-        <Button mode="text" onPress={() => deleteProgram(item.id)} textColor="#e53935">
+        <Button mode="text" onPress={() => handleDeleteProgram(item.id)} textColor="#e53935">
           Poista
         </Button>
       </Card.Actions>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size='large' color= '#1E88E5' />  
+      </View>
+    )
+  }
      return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.text}>Luo uusi ohjelma 🏋️‍♂️</Text>
 
-        <TextInput label="Ohjelman nimi" value={programName} onChangeText={setProgramName} mode='outlined' style={styles.input} />
-        <TextInput label="Kuvaus" value={programDesc} onChangeText={setProgramDesc} mode='outlined' style={styles.input} />
-        <Button mode="contained" onPress={handleAddProgram} style={styles.button} icon="plus">Lisää ohjelma</Button>
+        <TextInput 
+        label="Ohjelman nimi" 
+        value={programName} 
+        onChangeText={setProgramName} 
+        mode='outlined' 
+        style={styles.input} 
+        />
+        <TextInput 
+        label="Kuvaus" 
+        value={programDesc} 
+        onChangeText={setProgramDesc} 
+        mode='outlined' 
+        style={styles.input} 
+        />
+        <Button 
+        mode="contained" 
+        onPress={handleAddProgram} 
+        style={styles.button} 
+        icon="plus"
+        >
+          Lisää ohjelma
+        </Button>
 
         <FlatList
           data={programs}
@@ -52,12 +83,21 @@ export default function ProgramScreen({ navigation}) {
           ListEmptyComponent={<Text style={styles.emptyText}>Ei ohjelmia vielä.</Text>}
         />
       </View>
+      
+      <Snackbar
+        visible={!!error}
+        onDismiss={() => {}}
+        duration={3000}
+      >
+        {error}
+      </Snackbar>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center'},
   content: { flex: 1, padding: 16 },
   input: { marginBottom: 10 },
   button: { marginBottom: 20 },

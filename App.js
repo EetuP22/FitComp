@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import MainNavigator from './app/navigation/MainNavigator';
 import { theme } from './app/styles/theme';
-import { ProgramProvider } from './app/context/ProgramContext';
 import { initDatabase } from './app/db/database';
+import { ProgramProvider, CalendarProvider, ExerciseProvider } from './app/context';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function App() {
@@ -28,7 +28,11 @@ export default function App() {
   return (
     <PaperProvider theme={theme}>
       <ProgramProvider>
+        <CalendarProvider>
+          <ExerciseProvider>
         <MainNavigator />
+          </ExerciseProvider>
+        </CalendarProvider>
       </ProgramProvider>
     </PaperProvider>
   );

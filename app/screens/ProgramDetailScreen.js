@@ -2,24 +2,30 @@ import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { Card, Button, TextInput, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { useProgram } from '../context/ProgramContext';
+import { useProgram } from '../context/ProgramProvider';
+import { useCalendar } from '../context/CalendarProvider';
 
 export default function ProgramDetailScreen({ route }) {
     const { programId } = route.params;
     const { getProgramById, addDay, deleteDay } = useProgram();
+    const { deleteCalendarEntryByDayId } = useCalendar();
     const  program  = getProgramById(programId);
     const [dayName, setDayName] = useState('');
     const navigation = useNavigation();
 
     if (!program) return <Text>Ohjelmaa ei löytynyt.</Text>;
 
-  
 
   const handleAddDay = () => {
     if (!dayName.trim()) return;
     addDay(programId, dayName.trim());
     setDayName('');
   };
+
+  const handleDeleteDay = async (dayId) => {
+    await deleteCalendarEntryByDayId(dayId);
+    await deleteDay(programId, dayId);
+  }
 
   const openDay = (dayId) => {
     navigation.navigate('DayDetail', { programId, dayId });
@@ -35,7 +41,7 @@ export default function ProgramDetailScreen({ route }) {
         <Button
           mode="text"
           textColor="#e53935"
-          onPress={() => deleteDay(programId, item.id)}
+          onPress={() => handleDeleteDay(item.id)}
         >
           Poista
         </Button>
