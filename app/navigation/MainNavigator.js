@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { TouchableOpacity, Text } from 'react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import MapScreen from '../screens/MapScreen';
@@ -19,10 +20,20 @@ function CalendarWithDayModal() {
     <Stack.Navigator screenOptions={{ headerShown: true }}>
       <Stack.Screen name="CalendarMain" component={CalendarScreen} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
-        <Stack.Screen 
-          name="DayDetailModal" 
+        <Stack.Screen
+          name="DayDetailModal"
           component={DayDetailScreen}
-          options={{ title: 'Treenipäivä', }}
+          options={({ navigation }) => ({
+            title: 'Treenipäivä',
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('CalendarMain')}
+                style={{ marginLeft: 12, marginRight: 12 }}
+              >
+                <Text style={{ color: '#1E88E5', fontWeight: '600' }}>Sulje</Text>
+              </TouchableOpacity>
+            ),
+          })}
         />
       </Stack.Group>
     </Stack.Navigator>

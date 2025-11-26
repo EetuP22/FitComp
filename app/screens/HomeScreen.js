@@ -166,7 +166,7 @@ const todayTraining = selectedDays[today];
             </Card.Actions>
           </Card>
 
-          <Card style={styles.quickActionCard}>
+          <Card style={styles.quickActionLastCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>🏋️</Text>
               <Text style={styles.quickActionText}>Ohjelmat</Text>
@@ -298,10 +298,14 @@ const styles = StyleSheet.create({
   },
   quickActionsGrid: {
     flexDirection: 'row',
-    gap: 12,
     marginBottom: 20,
   },
   quickActionCard: {
+    flex: 1,
+    elevation: 2,
+    marginRight: 12,
+  },
+  quickActionLastCard: {
     flex: 1,
     elevation: 2,
   },
