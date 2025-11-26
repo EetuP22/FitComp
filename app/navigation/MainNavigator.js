@@ -38,9 +38,21 @@ export default function MainNavigator() {
                     headerShown: false,
                     tabBarActiveTintColor: '#6200ee',
                     tabBarInactiveTintColor: 'gray',
-                    tabBarStyle: { backgroundColor: '#fff' },
-                }}
-            >
+                    tabBarStyle: {
+                    backgroundColor: '#FFFFFF',
+                    borderTopColor: '#E0E0E0',
+                    borderTopWidth: 1,
+                    paddingBottom: 6,
+                    paddingTop: 8,
+                    height: 60,
+                    },
+                    tabBarLabelStyle: {
+                        fontSize: 12,
+                        fontWeight: '500',
+                        marginTop: -4,
+                    },
+                    }}
+                >
                 <Tab.Screen
                     name="Home"
                     component={HomeScreen}
@@ -93,7 +105,6 @@ export default function MainNavigator() {
                 />
 
                
-
 
             </Tab.Navigator>
         </NavigationContainer>
