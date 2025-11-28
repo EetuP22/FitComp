@@ -32,6 +32,20 @@ export const initDatabase = async () => {
     );
 `);
 
+    await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS favorite_gyms (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          latitude REAL NOT NULL,
+          longitude REAL NOT NULL,
+          address TEXT,
+          distance REAL,
+          facilities TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+
+
     await createCalendarTable();
 
 
@@ -220,4 +234,6 @@ export const dbUpdateCalendarNotes = async (date, notes) => {
     } catch (error) {
         console.log("❌ Virhe päivitettäessä muistiinpanoja:", error);
     }
+
 };
+

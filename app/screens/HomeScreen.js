@@ -5,12 +5,21 @@ import { useNavigation } from '@react-navigation/native';
 import { useProgram } from '../context/ProgramProvider';
 import { useCalendar } from '../context/CalendarProvider';
 import CustAppBar from '../components/CustAppBar';
+import { gymRepo } from '../repositories/gymRepo';
 
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { programs } = useProgram();
   const { selectedDays } = useCalendar();
+  const [ favoriteGyms, setFavoriteGyms ] = React.useState([]);
+
+  React.useEffect(() => {
+    (async () => {
+      const saved = await gymRepo.getAllFavoriteGyms();
+      setFavoriteGyms(saved);
+    })();
+  }, []);
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -59,6 +68,12 @@ const todayTraining = selectedDays[today];
   const navigateToPrograms = () => {
     navigation.navigate('Programs');
   };
+
+  const navigateToFavoriteGyms = () => {
+    navigation.navigate('Map', { showFavorites: true });  
+  };
+
+  const favoriteGymsCount = favoriteGyms.length;
 
   return (
     <View style={styles.container}>
@@ -166,7 +181,24 @@ const todayTraining = selectedDays[today];
             </Card.Actions>
           </Card>
 
-          <Card style={styles.quickActionLastCard}>
+          <Card style={styles.quickActionCard}>
+            <Card.Content style={styles.quickActionContent}>
+              <Text style={styles.quickActionEmoji}>🗺️</Text>
+              <Text style={styles.quickActionText}>Kuntosalikartta</Text>
+              {favoriteGymsCount > 0 && (
+                <Text style={styles.badgeText}>{favoriteGymsCount}</Text>
+              )}
+            </Card.Content>
+            <Card.Actions>
+              <Button mode="text" onPress={navigateToFavoriteGyms} compact>
+                Avaa
+              </Button>
+            </Card.Actions>
+          </Card>
+
+
+
+          <Card style={styles.quickActionCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>🏋️</Text>
               <Text style={styles.quickActionText}>Ohjelmat</Text>
@@ -299,15 +331,17 @@ const styles = StyleSheet.create({
   quickActionsGrid: {
     flexDirection: 'row',
     marginBottom: 20,
+    gap: 8,
   },
   quickActionCard: {
     flex: 1,
     elevation: 2,
-    marginRight: 12,
   },
-  quickActionLastCard: {
-    flex: 1,
-    elevation: 2,
+  badgeText: {
+    fontSize: 10,
+    color: '#FF6B6B',
+    fontWeight: '700',
+    marginTop: 4,
   },
   quickActionContent: {
     alignItems: 'center',

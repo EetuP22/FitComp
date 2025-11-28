@@ -5,11 +5,11 @@ import * as Location from 'expo-location';
 import { Text, Button, Card, Snackbar, Searchbar, Chip } from 'react-native-paper';
 import CustAppBar from '../components/CustAppBar';
 import { gymService } from '../services/gymService';
+import { gymRepo } from '../repositories/gymRepo';
 
 
 
-
-export default function MapScreen() {
+export default function MapScreen({ route }) {
 
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +58,7 @@ export default function MapScreen() {
     const fetchNearbyGyms = async (lat, lng) => {
     try {
       setSearching(true);
-      const fetchedGyms = await gymService.searchGymsNearby(lat, lng, 5);
+      const fetchedGyms = await gymService.searchGymsNearby(lat, lng, 15);
       setGyms(fetchedGyms);
       setError(null);
     } catch (err) {
@@ -89,6 +89,16 @@ export default function MapScreen() {
     }
   };
 
+  useEffect (() => {
+    if (!location) return;
+    if (searchQuery.trim() === '') {
+      if (!searching) {
+        fetchNearbyGyms(location.latitude, location.longitude);
+        setSelectedGym(null);
+      }
+    }
+  }, [searchQuery, location]);
+
   const filteredGyms = searchQuery.trim()
     ? gyms.filter(
         (gym) =>
@@ -97,17 +107,41 @@ export default function MapScreen() {
       )
     : gyms;
 
-  const toggleFavorite = (gym) => {
+  const toggleFavorite = async (gym) => {
     const isFavorited = favoriteGyms.some((fav) => fav.id === gym.id);
+    try {
     if (isFavorited) {
+      await gymRepo.removeFavoriteGym(gym.id);
       setFavoriteGyms(favoriteGyms.filter((fav) => fav.id !== gym.id));
       setSnackbarMessage(`${gym.name} poistettu suosikeista`);
     } else {
+      await gymRepo.saveFavoriteGym(gym);
       setFavoriteGyms([...favoriteGyms, gym]);
       setSnackbarMessage(`${gym.name} lisätty suosikkeihin ⭐`);
     }
     setSnackbarVisible(true);
+  } catch (err) {
+    setSnackbarMessage('Virhe suosikkien tallennuksessa');
+    setSnackbarVisible(true);
+    console.error('toggleFavorite error', err);
+    }
   };
+useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const saved = await gymRepo.getAllFavoriteGyms();
+      if (!mounted) return;
+      setFavoriteGyms(saved);
+      if (route?.params?.showFavorites) {
+        setGyms(saved);
+        setSelectedGym(null);
+        setSearchQuery('');
+      }
+    })();
+    return () => {
+      mounted = false;
+   };
+  }, [route?.params?.showFavorites]);
 
   const isFavorited = (gymId) => favoriteGyms.some((fav) => fav.id === gymId);
 
@@ -206,15 +240,15 @@ export default function MapScreen() {
 
               <Text style={styles.facilitiesLabel}>Palvelut:</Text>
               <View style={styles.facilitiesContainer}>
-                {selectedGym.facilities.map((facility) => (
-                  <Chip
-                    key={facility}
-                    label={facility}
-                    style={styles.facilityChip}
-                    mode="outlined"
-                    compact
-                  />
-                ))}
+                {selectedGym.facilities && selectedGym.facilities.length > 0 ? (
+                  selectedGym.facilities.map((facility) => (
+                    <Chip key={facility} style={styles.facilityChip} mode="outlined" compact>
+                      {facility}
+                    </Chip>
+                  ))
+                ) : (
+                  <Text style={styles.noFacilitiesText}>Ei tietoa palveluista</Text>
+                )}
               </View>
             </Card.Content>
 
@@ -422,8 +456,12 @@ const styles = StyleSheet.create({
   facilitiesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
     marginBottom: 12,
+  },
+  noFacilitiesText: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
   },
   facilityChip: {
     marginRight: 4,
