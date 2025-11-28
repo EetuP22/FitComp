@@ -4,49 +4,10 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Text, Button, Card, Snackbar, Searchbar, Chip } from 'react-native-paper';
 import CustAppBar from '../components/CustAppBar';
+import { gymService } from '../services/gymService';
 
-const MOCK_GYMS = [
-    {
-    id: 'fitness24-martinlaakso',
-    name: 'Fitness24Seven Martinlaakso',
-    latitude: 60.2940,
-    longitude: 24.8470,
-    address: 'Martinlaakso, Vantaa (esimerkki)',
-    distance: 0.4,
-    rating: 4.1,
-    facilities: ['Weights', 'Cardio'],
-  },
-  {
-    id: 'easyfit-myyrmaki',
-    name: 'EasyFit Myyrmäki',
-    latitude: 60.2938,
-    longitude: 24.8290,
-    address: 'Myyrmäki, Vantaa (esimerkki)',
-    distance: 1.0,
-    rating: 4.2,
-    facilities: ['Weights', 'Classes'],
-  },
-  {
-    id: 'crossfit-vantaa',
-    name: 'CrossFit Vantaa',
-    latitude: 60.2955,
-    longitude: 24.8400,
-    address: 'Martinlaakso / Myyrmäki alue (esimerkki)',
-    distance: 0.9,
-    rating: 4.6,
-    facilities: ['CrossFit', 'Classes'],
-  },
-  {
-    id: 'localgym-west',
-    name: 'Vantaa West Gym',
-    latitude: 60.2895,
-    longitude: 24.8360,
-    address: 'Lähiö, Vantaa (esimerkki)',
-    distance: 1.6,
-    rating: 4.0,
-    facilities: ['Weights', 'Sauna'],
-  },
-];
+
+
 
 export default function MapScreen() {
 
@@ -58,6 +19,8 @@ export default function MapScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [error, setError] = useState(null);
+  const [ gyms, setGyms ] = useState ([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     requestLocationPermission();
@@ -73,24 +36,66 @@ export default function MapScreen() {
       }
 
       const userLocation = await Location.getCurrentPositionAsync({});
+      const lat = userLocation.coords.latitude;
+      const lng = userLocation.coords.longitude;
+
       setLocation({
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
+      await fetchNearbyGyms(lat, lng);
+      setError(null);
+      } catch (err) {
+        setError('Virhe paikallistamisessa');
+        console.error('Location error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchNearbyGyms = async (lat, lng) => {
+    try {
+      setSearching(true);
+      const fetchedGyms = await gymService.searchGymsNearby(lat, lng, 5);
+      setGyms(fetchedGyms);
+      setError(null);
     } catch (err) {
-      setError('Virhe paikallistamisessa');
-      console.error('Location error:', err);
+      setError('Virhe kuntosalien haussa. Yritä uudelleen.');
+      console.error('fetchNearbyGyms error', err);
     } finally {
-      setLoading(false);
+      setSearching(false);
+    }
+    };
+  
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || !location) return;
+    try {
+      setSearching(true);
+      const results = await gymService.searchGymsByName(
+        searchQuery,
+        location.latitude,
+        location.longitude,
+        10
+      );
+      setGyms(results);
+      setError(null);
+    } catch (err) {
+      setError('Haku epäonnistui. Yritä uudelleen.');
+      console.error('handleSearch error', err);
+    } finally {
+      setSearching(false);
     }
   };
 
-  const filteredGyms = MOCK_GYMS.filter((gym) =>
-    gym.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    gym.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredGyms = searchQuery.trim()
+    ? gyms.filter(
+        (gym) =>
+          gym.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (gym.address || '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : gyms;
 
   const toggleFavorite = (gym) => {
     const isFavorited = favoriteGyms.some((fav) => fav.id === gym.id);
@@ -112,13 +117,13 @@ export default function MapScreen() {
         <CustAppBar title="Kuntosalit" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#1E88E5" />
-          <Text style={styles.loadingText}>Haetaan sinun sijaintia...</Text>
+          <Text style={styles.loadingText}>Haetaan sijaintia...</Text>
         </View>
       </View>
     );
   }
 
-  if (error) {
+  if (error && !location) {
     return (
       <View style={styles.container}>
         <CustAppBar title="Kuntosalit" />
@@ -180,6 +185,7 @@ export default function MapScreen() {
           placeholder="Hae kuntosaleja..."
           onChangeText={setSearchQuery}
           value={searchQuery}
+          onSubmitEditing={handleSearch}
           style={styles.searchbar}
           inputStyle={styles.searchInput}
         />
