@@ -45,6 +45,40 @@ export const initDatabase = async () => {
         );
       `);
 
+      await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS exercise_library (
+        id TEXT PRIMARY KEY,
+        wger_id INTEGER,
+        name TEXT NOT NULL,
+        description TEXT,
+        muscles TEXT,
+        equipment TEXT,
+        images TEXT,
+        videos TEXT,
+        source TEXT,
+        last_fetched INTEGER
+      );
+    `);
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS favorite_exercises (
+        id TEXT PRIMARY KEY,
+        library_id TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS program_exercises (
+        id TEXT PRIMARY KEY,
+        programId TEXT,
+        dayId TEXT,
+        libraryId TEXT,
+        customName TEXT,
+        meta TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
     await createCalendarTable();
 

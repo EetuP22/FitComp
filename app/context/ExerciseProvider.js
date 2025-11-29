@@ -26,7 +26,7 @@ export const ExerciseProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await exerciseRepo.searchExercisesByMuscle(muscle);
+      const data = await exerciseRepo.getExercises({muscle, page: 1, limit: 50});
       setExercises(data);
     } catch (err) {
       setError(err.message);
