@@ -15,17 +15,22 @@ const mapRowToExercise = (row) => ({
 });
 
 export const exerciseRepo = {
-  async getExercises({ search = '', muscle = null, page = 1, limit = 20 } = {}) {
+  async getExercises({ search = '', muscle = null, page = 1, limit = 30 } = {}) {
+    console.log('📚 exerciseRepo.getExercises called with:', { search, muscle, page, limit });
     try {
       const res = await exerciseService.fetchExercises({ search, muscle, page, limit });
+      console.log('📚 exerciseRepo received from service:', res.results?.length || 0, 'exercises');
       const db = getDb();
+
       if (db && typeof db.runAsync === 'function') {
-        for (const item of res.results || []) {
+        for (const item of res.results) {
+          const id = `wger-${item.wger_id}`;
+          const nameSafe = (item.name || `Exercise ${item.wger_id}`).trim() || `Exercise ${item.wger_id}`;
+          
           try {
-            const id = `wger-${item.wger_id}`;
-            const nameSafe = (item.name || `Exercise ${item.wger_id}`).trim() || `Exercise ${item.wger_id}`;
             await db.runAsync(
-              `INSERT OR REPLACE INTO exercise_library (id, wger_id, name, description, muscles, equipment, images, videos, source, last_fetched)
+              `INSERT OR REPLACE INTO exercise_library
+               (id, wger_id, name, description, muscles, equipment, images, videos, source, last_fetched)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 id,
@@ -34,135 +39,80 @@ export const exerciseRepo = {
                 item.description || '',
                 JSON.stringify(item.muscles || []),
                 JSON.stringify(item.equipment || []),
-                JSON.stringify([]),
+                JSON.stringify(item.images || []), 
                 JSON.stringify([]),
                 'wger',
                 Date.now(),
               ]
             );
           } catch (e) {
-            console.warn('exerciseRepo: failed to upsert item', item?.wger_id, e);
+            console.warn('exerciseRepo upsert failed', id, e?.message);
           }
         }
       }
-      return (res.results || []).map((r) => ({
-        id: `wger-${r.wger_id}`,
-        ...r,
-      }));
-    } catch (err) {
-      console.error('exerciseRepo.getExercises error', err);
-      throw err;
-    }
-  },
 
-  async searchExercisesByMuscle(muscle, opts = {}) {
-    return this.getExercises({ ...opts, muscle });
+      const mapped = (res.results || []).map((r) => ({
+        id: `wger-${r.wger_id}`,
+        wger_id: r.wger_id,
+        name: (r.name || `Exercise ${r.wger_id}`).trim(),
+        description: r.description || '',
+        muscles: r.muscles || [],
+        equipment: r.equipment || [],
+        images: r.images || [], 
+      }));
+      
+      console.log('📚 exerciseRepo returning:', mapped.length, 'exercises');
+      return mapped;
+    } catch (error) {
+      console.error('❌ exerciseRepo.getExercises error:', error);
+      return [];
+    }
   },
 
   async getExerciseById(localId) {
-    try {
-      const db = getDb();
+    const db = getDb();
 
-      if (db && typeof db.getFirstAsync === 'function') {
-        const row = await db.getFirstAsync('SELECT * FROM exercise_library WHERE id = ?;', [localId]);
-        if (row) return mapRowToExercise(row);
-      }
-
-      if (typeof localId === 'string' && localId.startsWith('wger-')) {
-        const wgerId = parseInt(localId.replace('wger-', ''), 10);
-        if (Number.isNaN(wgerId)) return null;
-
-        const detail = await exerciseService.fetchExerciseDetail(wgerId);
-        if (!detail) return null;
-
-        const saveId = `wger-${detail.wger_id ?? detail.id ?? wgerId}`;
-        const realWgerId = detail.wger_id ?? detail.id ?? wgerId;
-        const nameSafe = (detail.name || `Exercise ${realWgerId}`).trim() || `Exercise ${realWgerId}`;
-
-        if (db && typeof db.runAsync === 'function') {
-          try {
-            await db.runAsync(
-              `INSERT OR REPLACE INTO exercise_library (id, wger_id, name, description, muscles, equipment, images, videos, source, last_fetched)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                saveId,
-                realWgerId,
-                nameSafe,
-                detail.description || '',
-                JSON.stringify(detail.muscles || []),
-                JSON.stringify(detail.equipment || []),
-                JSON.stringify(detail.images || []),
-                JSON.stringify([]),
-                'wger',
-                Date.now(),
-              ]
-            );
-          } catch (e) {
-            console.warn('exerciseRepo.getExerciseById: failed to persist detail', e);
-          }
-        }
-
-        return {
-          id: saveId,
-          wger_id: realWgerId,
-          name: nameSafe,
-          description: detail.description,
-          muscles: detail.muscles || [],
-          equipment: detail.equipment || [],
-          images: detail.images || [],
-          videos: [],
-        };
-      }
-
-      return null;
-    } catch (err) {
-      console.error('exerciseRepo.getExerciseById error', err);
-      throw err;
+    if (db && typeof db.getFirstAsync === 'function') {
+      const row = await db.getFirstAsync('SELECT * FROM exercise_library WHERE id = ?;', [localId]);
+      if (row) return mapRowToExercise(row);
     }
-  },
 
-  async saveLibraryItem(item) {
-    try {
-      const db = getDb();
-      const id = item.id || (item.wger_id ? `wger-${item.wger_id}` : Date.now().toString());
-      const nameSafe = (item.name || `Exercise ${item.wger_id || id}`).trim() || String(id);
-      if (db && typeof db.runAsync === 'function') {
+    const wgerId = parseInt(String(localId).replace('wger-', ''), 10);
+    const detail = await exerciseService.fetchExerciseDetail(wgerId);
+
+    if (db && typeof db.runAsync === 'function') {
+      try {
         await db.runAsync(
-          `INSERT OR REPLACE INTO exercise_library (id, wger_id, name, description, muscles, equipment, images, videos, source, last_fetched)
+          `INSERT OR REPLACE INTO exercise_library
+           (id, wger_id, name, description, muscles, equipment, images, videos, source, last_fetched)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            id,
-            item.wger_id || null,
-            nameSafe,
-            item.description || '',
-            JSON.stringify(item.muscles || []),
-            JSON.stringify(item.equipment || []),
-            JSON.stringify(item.images || []),
-            JSON.stringify(item.videos || []),
-            item.source || 'local',
+            `wger-${detail.wger_id}`,
+            detail.wger_id,
+            (detail.name || `Exercise ${detail.wger_id}`).trim(),
+            detail.description || '',
+            JSON.stringify(detail.muscles || []),
+            JSON.stringify(detail.equipment || []),
+            JSON.stringify(detail.images || []),
+            JSON.stringify([]),
+            'wger',
             Date.now(),
           ]
         );
-        return id;
+      } catch (e) {
+        console.warn('exerciseRepo.persist detail failed', e?.message);
       }
-      return id;
-    } catch (err) {
-      console.error('exerciseRepo.saveLibraryItem error', err);
-      throw err;
     }
-  },
 
-  async getLibrary({ limit = 50, offset = 0 } = {}) {
-    try {
-      const db = getDb();
-      if (db && typeof db.getAllAsync === 'function') {
-        const rows = await db.getAllAsync('SELECT * FROM exercise_library ORDER BY name LIMIT ? OFFSET ?;', [limit, offset]);
-        return rows.map(mapRowToExercise);
-      }
-      return [];
-    } catch (err) {
-      console.error('exerciseRepo.getLibrary error', err);
-      return [];
-    }
+    return {
+      id: `wger-${detail.wger_id}`,
+      wger_id: detail.wger_id,
+      name: (detail.name || `Exercise ${detail.wger_id}`).trim(),
+      description: detail.description || '',
+      muscles: detail.muscles || [],
+      equipment: detail.equipment || [],
+      images: detail.images || [],
+      videos: [],
+    };
   },
 };

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { Card, Button, TextInput, Text } from 'react-native-paper';
+import { Card, Button, TextInput, Text, Divider } from 'react-native-paper';
 import { useProgram } from '../context/ProgramProvider';
+import { useNavigation } from '@react-navigation/native';
 
 export default function DayDetailScreen({ route }) {
   const { programId, dayId } = route.params;
   const { getDayById, addExercise, deleteExercise } = useProgram();
+  const navigation = useNavigation();
   const day = getDayById(programId, dayId);
   const [exerciseName, setExerciseName] = useState('');
 
@@ -20,6 +22,22 @@ export default function DayDetailScreen({ route }) {
     if (!exerciseName.trim()) return;
     addExercise(programId, dayId, exerciseName.trim());
     setExerciseName('');
+  };
+
+  const handleBrowseLibrary = () => {
+    // Navigate to exercise library in selection mode
+    navigation.navigate('Exercises', {
+      screen: 'ExerciseList',
+      params: {
+        selectionMode: true,
+        onSelectExercise: (exercise) => {
+          // Add selected exercise to this day
+          addExercise(programId, dayId, exercise.name);
+          // Navigate back
+          navigation.goBack();
+        }
+      }
+    });
   };
 
   const renderExercise = ({ item }) => (
@@ -42,6 +60,21 @@ export default function DayDetailScreen({ route }) {
         <Text style={styles.title}>{day.name}</Text>
       <View style={styles.content}>
         <Text style={styles.subtitle}>Lisää harjoituksia tälle päivälle 🏋️</Text>
+        
+        {/* Browse Library Button */}
+        <Button
+          mode="contained"
+          onPress={handleBrowseLibrary}
+          icon="magnify"
+          style={styles.button}
+        >
+          Selaa liikepankkia
+        </Button>
+
+        <Divider style={styles.divider} />
+        <Text style={styles.orText}>tai kirjoita nimi manuaalisesti</Text>
+        
+        {/* Manual Input */}
         <TextInput
           label="Liikkeen nimi"
           value={exerciseName}
@@ -50,7 +83,7 @@ export default function DayDetailScreen({ route }) {
           style={styles.input}
         />
         <Button
-          mode="contained"
+          mode="outlined"
           onPress={handleAddExercise}
           icon="plus"
           style={styles.button}
@@ -83,6 +116,14 @@ const styles = StyleSheet.create({
   },
   content: { flex: 1, padding: 16 },
   subtitle: { fontSize: 16, marginBottom: 12, color: '#555' },
+  divider: { marginVertical: 16 },
+  orText: { 
+    textAlign: 'center', 
+    color: '#999', 
+    fontSize: 14, 
+    marginVertical: 12,
+    fontStyle: 'italic'
+  },
   input: { marginBottom: 10 },
   button: { marginBottom: 20 },
   card: { marginBottom: 10, elevation: 2 },

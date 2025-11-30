@@ -5,6 +5,10 @@ let db = null;
 export const initDatabase = async () => {
     try {
         db = await SQLite.openDatabaseAsync('fitcomp.db');
+        await db.execAsync(`PRAGMA foreign_keys = ON;`);
+    await db.execAsync(`PRAGMA journal_mode = WAL;`);
+  
+
 
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS programs (
@@ -79,6 +83,17 @@ export const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+    await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS custom_exercises (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      muscles TEXT,
+      difficulty TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
 
     await createCalendarTable();
 

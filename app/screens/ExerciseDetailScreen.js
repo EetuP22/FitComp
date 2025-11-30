@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Image, StyleSheet } from 'react-native';
 import { Text, Button, Card, ActivityIndicator } from 'react-native-paper';
 import { exerciseRepo } from '../repositories/exerciseRepo';
+import { exerciseService } from '../services/exerciseService';
 
 export default function ExerciseDetailScreen({ route, navigation }) {
   const { id } = route.params || {};
   const [exercise, setExercise] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [muscleMap, setMuscleMap] = useState(new Map());
 
   useEffect(() => {
     let mounted = true;
@@ -16,6 +18,8 @@ export default function ExerciseDetailScreen({ route, navigation }) {
         const e = await exerciseRepo.getExerciseById(id);
         if (!mounted) return;
         setExercise(e);
+        const m = await exerciseService.fetchMuscles();
+        setMuscleMap(new Map(m.map(mm => [Number(mm.id), mm.name])));
       } catch (err) {
         console.error('ExerciseDetail load error', err);
       } finally {
@@ -26,8 +30,6 @@ export default function ExerciseDetailScreen({ route, navigation }) {
       mounted = false;
     };
   }, [id]);
-
-  const stripHtml = (html = '') => (html ? html.replace(/<[^>]*>/g, '').trim() : '');
 
   if (loading) {
     return (
@@ -48,32 +50,39 @@ export default function ExerciseDetailScreen({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Card>
+      <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.title}>{exercise.name}</Text>
-          <Text style={styles.desc}>{stripHtml(exercise.description || '')}</Text>
+          {exercise.description && (
+            <Text style={styles.desc}>{exercise.description}</Text>
+          )}
         </Card.Content>
 
         {exercise.images && exercise.images.length > 0 && (
-          <ScrollView horizontal style={styles.imagesRow} showsHorizontalScrollIndicator={false}>
-            {exercise.images.map((uri) => (
-              <Image key={uri} source={{ uri }} style={styles.image} />
-            ))}
-          </ScrollView>
+          <View style={styles.imagesContainer}>
+            <Text style={styles.imagesTitle}>Kuvat:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow}>
+              {exercise.images.map((uri, idx) => (
+                <Image key={idx} source={{ uri }} style={styles.image} />
+              ))}
+            </ScrollView>
+          </View>
         )}
 
         <Card.Content>
           {exercise.muscles && exercise.muscles.length > 0 && (
-            <Text style={{ marginBottom: 8 }}>Lihakset: {exercise.muscles.join(', ')}</Text>
+            <Text style={styles.info}>
+              💪 Lihakset: {exercise.muscles.map(m => muscleMap.get(Number(m)) || m).join(', ')}
+            </Text>
           )}
           {exercise.equipment && exercise.equipment.length > 0 && (
-            <Text style={{ marginBottom: 8 }}>Välineet: {exercise.equipment.join(', ')}</Text>
+            <Text style={styles.info}>🛠️ Välineet: {exercise.equipment.join(', ')}</Text>
           )}
         </Card.Content>
 
-        <Card.Actions>
+        <Card.Actions style={styles.actions}>
           <Button onPress={() => navigation.goBack()}>Sulje</Button>
-          <Button mode="contained" onPress={() => {/* Lisää ohjelmaan: toteutus vaiheessa 2 */}}>
+          <Button mode="contained" onPress={() => {/* Lisää ohjelmaan */}}>
             Lisää ohjelmaan
           </Button>
         </Card.Actions>
@@ -84,8 +93,13 @@ export default function ExerciseDetailScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12, backgroundColor: '#fff' },
-  title: { fontSize: 20, fontWeight: '700', marginBottom: 8 },
-  desc: { color: '#444', marginBottom: 12 },
-  imagesRow: { padding: 12 },
-  image: { width: 200, height: 140, marginRight: 10, borderRadius: 8 },
+  card: { marginBottom: 20, elevation: 2 },
+  title: { fontSize: 20, fontWeight: '700', marginBottom: 8, color: '#212121' },
+  desc: { color: '#666', marginBottom: 12, fontSize: 14, lineHeight: 20 },
+  imagesContainer: { paddingHorizontal: 16, paddingBottom: 12 },
+  imagesTitle: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
+  imagesRow: { flexDirection: 'row' },
+  image: { width: 200, height: 150, marginRight: 12, borderRadius: 8, backgroundColor: '#eee' },
+  info: { fontSize: 14, color: '#555', marginBottom: 6 },
+  actions: { justifyContent: 'flex-end', paddingTop: 12 },
 });

@@ -80,7 +80,7 @@ const todayTraining = selectedDays[today];
       <CustAppBar title="FitComp" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.welcomeText}>Tervetuloa! 💪</Text>
+        <Text style={styles.welcomeText}>Welcome to your fitness companion! 💪</Text>
         <Text style={styles.subtitle}>
           {todayTraining ? "Tänään sinulla on treeni!" : "Ei treeniä tänään."}
         </Text>
