@@ -30,7 +30,7 @@ export default function MapScreen({ route }) {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setError('Paikallistaminen evätty. Ota käyttöön asetuksista.');
+        setError('Location permission denied. Enable it in settings.');
         setLoading(false);
         return;
       }
@@ -48,7 +48,7 @@ export default function MapScreen({ route }) {
       await fetchNearbyGyms(lat, lng);
       setError(null);
       } catch (err) {
-        setError('Virhe paikallistamisessa');
+        setError('Error getting location');
         console.error('Location error:', err);
       } finally {
         setLoading(false);
@@ -62,7 +62,7 @@ export default function MapScreen({ route }) {
       setGyms(fetchedGyms);
       setError(null);
     } catch (err) {
-      setError('Virhe kuntosalien haussa. Yritä uudelleen.');
+      setError('Error fetching gyms. Try again.');
       console.error('fetchNearbyGyms error', err);
     } finally {
       setSearching(false);
@@ -82,7 +82,7 @@ export default function MapScreen({ route }) {
       setGyms(results);
       setError(null);
     } catch (err) {
-      setError('Haku epäonnistui. Yritä uudelleen.');
+      setError('Search failed. Try again.');
       console.error('handleSearch error', err);
     } finally {
       setSearching(false);
@@ -113,15 +113,15 @@ export default function MapScreen({ route }) {
     if (isFavorited) {
       await gymRepo.removeFavoriteGym(gym.id);
       setFavoriteGyms(favoriteGyms.filter((fav) => fav.id !== gym.id));
-      setSnackbarMessage(`${gym.name} poistettu suosikeista`);
+      setSnackbarMessage(`${gym.name} removed from favorites`);
     } else {
       await gymRepo.saveFavoriteGym(gym);
       setFavoriteGyms([...favoriteGyms, gym]);
-      setSnackbarMessage(`${gym.name} lisätty suosikkeihin ⭐`);
+      setSnackbarMessage(`${gym.name} added to favorites ⭐`);
     }
     setSnackbarVisible(true);
   } catch (err) {
-    setSnackbarMessage('Virhe suosikkien tallennuksessa');
+    setSnackbarMessage('Error saving favorites');
     setSnackbarVisible(true);
     console.error('toggleFavorite error', err);
     }
@@ -148,10 +148,10 @@ useEffect(() => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <CustAppBar title="Kuntosalit" />
+        <CustAppBar title="Gyms" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#1E88E5" />
-          <Text style={styles.loadingText}>Haetaan sijaintia...</Text>
+          <Text style={styles.loadingText}>Getting location...</Text>
         </View>
       </View>
     );
@@ -160,7 +160,7 @@ useEffect(() => {
   if (error && !location) {
     return (
       <View style={styles.container}>
-        <CustAppBar title="Kuntosalit" />
+        <CustAppBar title="Gyms" />
         <View style={styles.centered}>
           <Text style={styles.errorText}>❌ {error}</Text>
           <Button
@@ -169,7 +169,7 @@ useEffect(() => {
             style={styles.retryButton}
             icon="refresh"
           >
-            Yritä uudelleen
+            Try again
           </Button>
         </View>
       </View>
@@ -178,7 +178,7 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
-      <CustAppBar title="Kuntosalit 🗺️" />
+      <CustAppBar title="Gyms 🗺️" />
 
       {location && (
         <MapView
@@ -194,7 +194,7 @@ useEffect(() => {
               latitude: location.latitude,
               longitude: location.longitude,
             }}
-            title="Sinun sijainti"
+            title="Your location"
             pinColor="#1E88E5"
           />
 
@@ -216,7 +216,7 @@ useEffect(() => {
 
       <View style={styles.searchContainer}>
         <Searchbar
-          placeholder="Hae kuntosaleja..."
+          placeholder="Search for gyms..."
           onChangeText={setSearchQuery}
           value={searchQuery}
           onSubmitEditing={handleSearch}
@@ -232,13 +232,13 @@ useEffect(() => {
               <Text style={styles.gymName}>{selectedGym.name}</Text>
               <Text style={styles.gymAddress}>📍 {selectedGym.address}</Text>
               <Text style={styles.gymDistance}>
-                📏 {selectedGym.distance.toFixed(1)} km päässä
+                📏 {selectedGym.distance.toFixed(1)} km away
               </Text>
               <Text style={styles.gymRating}>
                 ⭐ {selectedGym.rating} / 5.0
               </Text>
 
-              <Text style={styles.facilitiesLabel}>Palvelut:</Text>
+              <Text style={styles.facilitiesLabel}>Facilities:</Text>
               <View style={styles.facilitiesContainer}>
                 {selectedGym.facilities && selectedGym.facilities.length > 0 ? (
                   selectedGym.facilities.map((facility) => (
@@ -247,7 +247,7 @@ useEffect(() => {
                     </Chip>
                   ))
                 ) : (
-                  <Text style={styles.noFacilitiesText}>Ei tietoa palveluista</Text>
+                  <Text style={styles.noFacilitiesText}>No facility information</Text>
                 )}
               </View>
             </Card.Content>
@@ -257,7 +257,7 @@ useEffect(() => {
                 mode="outlined"
                 onPress={() => setSelectedGym(null)}
               >
-                Sulje
+                Close
               </Button>
               <Button
                 mode="contained"
@@ -265,7 +265,7 @@ useEffect(() => {
                 icon={isFavorited(selectedGym.id) ? 'star' : 'star-outline'}
                 buttonColor={isFavorited(selectedGym.id) ? '#FFD700' : undefined}
               >
-                {isFavorited(selectedGym.id) ? 'Suosikissa' : 'Lisää suosikkeihin'}
+                {isFavorited(selectedGym.id) ? 'In favorites' : 'Add to favorites'}
               </Button>
             </Card.Actions>
           </Card>
@@ -306,7 +306,7 @@ useEffect(() => {
               <Card style={styles.emptyCard}>
                 <Card.Content>
                   <Text style={styles.emptyText}>
-                    Kuntosaleja ei löytynyt hakutermeillä "{searchQuery}"
+                    No gyms found with search term "{searchQuery}"
                   </Text>
                 </Card.Content>
               </Card>

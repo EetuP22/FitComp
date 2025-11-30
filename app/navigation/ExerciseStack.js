@@ -14,13 +14,11 @@ export default function ExerciseStack() {
         name="ExerciseList" 
         component={ExerciseScreen} 
         options={({ route, navigation }) => ({ 
-          title: 'Liikepankki',
+          title: 'Exercise Library',
           headerLeft: route?.params?.selectionMode ? () => (
             <TouchableOpacity 
               onPress={() => {
-                // Clear params before navigating back
                 navigation.setParams({ selectionMode: false, onSelectExercise: undefined });
-                // Navigate back to Programs tab
                 navigation.getParent()?.navigate('Programs');
               }} 
               style={{ marginLeft: 16 }}
@@ -30,7 +28,7 @@ export default function ExerciseStack() {
           ) : undefined
         })} 
       />
-      <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} options={{ title: 'Liike' }} />
+      <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} options={{ title: 'Exercise' }} />
     </Stack.Navigator>
   );
 }

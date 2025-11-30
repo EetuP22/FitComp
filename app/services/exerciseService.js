@@ -38,7 +38,6 @@ export const exerciseService = {
           ? e.equipment.map(eq => typeof eq === 'object' ? eq.id : eq)
           : [];
 
-        // Map possible images (exerciseinfo sometimes contains image objects)
         const imageUrls = Array.isArray(e.images)
           ? e.images
               .map(img => {

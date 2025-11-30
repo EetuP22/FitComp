@@ -23,13 +23,13 @@ function CalendarWithDayModal() {
           name="DayDetailModal"
           component={require('../screens/DayDetailScreen').default}
           options={({ navigation }) => ({
-            title: 'Treenipäivä',
+            title: 'Workout Day',
             headerLeft: () => (
               <TouchableOpacity
                 onPress={() => navigation.navigate('CalendarMain')}
                 style={{ marginLeft: 12, marginRight: 12 }}
               >
-                <Text style={{ color: '#1E88E5', fontWeight: '600' }}>Sulje</Text>
+                <Text style={{ color: '#1E88E5', fontWeight: '600' }}>Close</Text>
               </TouchableOpacity>
             ),
           })}

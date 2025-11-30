@@ -13,8 +13,7 @@ export default function ProgramDetailScreen({ route }) {
     const [dayName, setDayName] = useState('');
     const navigation = useNavigation();
 
-    if (!program) return <Text>Ohjelmaa ei löytynyt.</Text>;
-
+    if (!program) return <Text>Program not found.</Text>;
 
   const handleAddDay = () => {
     if (!dayName.trim()) return;
@@ -36,14 +35,14 @@ export default function ProgramDetailScreen({ route }) {
       <Card.Title title={item.name} />
       <Card.Actions style={styles.cardActions}>
         <Button mode="outlined" onPress={() => openDay(item.id)}>
-          Avaa
+          Open
         </Button>
         <Button
           mode="text"
           textColor="#e53935"
           onPress={() => handleDeleteDay(item.id)}
         >
-          Poista
+          Delete
         </Button>
       </Card.Actions>
     </Card>
@@ -54,10 +53,10 @@ export default function ProgramDetailScreen({ route }) {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.subtitle}>
-          {program.desc || 'Ei kuvausta tälle ohjelmalle'}
+          {program.desc || 'No description for this program'}
         </Text>
         <TextInput
-          label="Lisää treenipäivä (esim. Yläkroppa)"
+          label="Add workout day (e.g. Upper Body)"
           value={dayName}
           onChangeText={setDayName}
           mode="outlined"
@@ -69,14 +68,14 @@ export default function ProgramDetailScreen({ route }) {
           icon="plus"
           style={styles.button}
         >
-          Lisää päivä
+          Add Day
         </Button>
         <FlatList
           data={program.days || []}
           keyExtractor={(item) => item.id}
           renderItem={renderDay}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Ei vielä treenipäiviä.</Text>
+            <Text style={styles.emptyText}>No workout days yet.</Text>
           }
         />
       </View>

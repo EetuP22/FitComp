@@ -82,23 +82,23 @@ const todayTraining = selectedDays[today];
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.welcomeText}>Welcome to your fitness companion! 💪</Text>
         <Text style={styles.subtitle}>
-          {todayTraining ? "Tänään sinulla on treeni!" : "Ei treeniä tänään."}
+          {todayTraining ? "You have a workout today!" : "No workout today."}
         </Text>
 
         {todayDay ? (
           <Card style={styles.card}>
             <Card.Title
-              title="Tänään"
+              title="Today"
               subtitle={todayDay.programName}
               left={() => <Text style={styles.emoji}>📅</Text>}
             />
             <Card.Content>
               <Text style={styles.dayName}>{todayDay.name}</Text>
               <Text style={styles.exerciseCount}>
-                {todayDay.exercises?.length || 0} liikettä
+                {todayDay.exercises?.length || 0} exercises
               </Text>
               {todayTraining.done && (
-                <Text style={styles.completedText}>✅ Merkitty tehdyksi</Text>
+                <Text style={styles.completedText}>✅ Marked as done</Text>
               )}
             </Card.Content>
             <Card.Actions>
@@ -114,10 +114,10 @@ const todayTraining = selectedDays[today];
                   })
                 }
               >
-                Avaa
+                Open
               </Button>
               <Button mode="text" onPress={navigateToCalendar}>
-                Kalenteri
+                Calendar
               </Button>
             </Card.Actions>
           </Card>
@@ -125,12 +125,12 @@ const todayTraining = selectedDays[today];
           <Card style={styles.card}>
             <Card.Content>
               <Text style={styles.noTrainingText}>
-                Ei liitettyä treeniä tänään. Valitse ohjelmapäivä kalenterista!
+                No training assigned today. Select a program day from the calendar!
               </Text>
             </Card.Content>
             <Card.Actions>
               <Button mode="contained" onPress={navigateToCalendar}>
-                Siirry kalenteriin
+                Go to calendar
               </Button>
             </Card.Actions>
           </Card>
@@ -138,25 +138,25 @@ const todayTraining = selectedDays[today];
 
         <Divider style={styles.divider} />
 
-        <Text style={styles.sectionTitle}>Viikon yhteenveto 📊</Text>
+        <Text style={styles.sectionTitle}>Weekly Summary 📊</Text>
         <Card style={styles.card}>
           <Card.Content>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Treenitty</Text>
+                <Text style={styles.statLabel}>Completed</Text>
                 <Text style={styles.statValue}>{weeklyStats.completed}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Yhteensä</Text>
+                <Text style={styles.statLabel}>Total</Text>
                 <Text style={styles.statValue}>{weeklyStats.total}</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Osuus</Text>
+                <Text style={styles.statLabel}>Rate</Text>
                 <Text style={styles.statValue}>{Math.round(completionRate)}%</Text>
               </View>
             </View>
 
-            <Text style={styles.progressLabel}>Valmistumisaste</Text>
+            <Text style={styles.progressLabel}>Completion rate</Text>
             <ProgressBar
               progress={completionRate / 100}
               color={completionRate >= 70 ? '#4CAF50' : '#FF9800'}
@@ -167,16 +167,16 @@ const todayTraining = selectedDays[today];
 
         <Divider style={styles.divider} />
 
-        <Text style={styles.sectionTitle}>Pika-toiminnot ⚡</Text>
+        <Text style={styles.sectionTitle}>Quick Actions ⚡</Text>
         <View style={styles.quickActionsGrid}>
           <Card style={styles.quickActionCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>📅</Text>
-              <Text style={styles.quickActionText}>Kalenteri</Text>
+              <Text style={styles.quickActionText}>Calendar</Text>
             </Card.Content>
             <Card.Actions>
               <Button mode="text" onPress={navigateToCalendar} compact>
-                Avaa
+                Open
               </Button>
             </Card.Actions>
           </Card>
@@ -184,14 +184,14 @@ const todayTraining = selectedDays[today];
           <Card style={styles.quickActionCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>🗺️</Text>
-              <Text style={styles.quickActionText}>Kuntosalikartta</Text>
+              <Text style={styles.quickActionText}>Gym Map</Text>
               {favoriteGymsCount > 0 && (
                 <Text style={styles.badgeText}>{favoriteGymsCount}</Text>
               )}
             </Card.Content>
             <Card.Actions>
               <Button mode="text" onPress={navigateToFavoriteGyms} compact>
-                Avaa
+                Open
               </Button>
             </Card.Actions>
           </Card>
@@ -201,11 +201,11 @@ const todayTraining = selectedDays[today];
           <Card style={styles.quickActionCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>🏋️</Text>
-              <Text style={styles.quickActionText}>Ohjelmat</Text>
+              <Text style={styles.quickActionText}>Programs</Text>
             </Card.Content>
             <Card.Actions>
               <Button mode="text" onPress={navigateToPrograms} compact>
-                Avaa
+                Open
               </Button>
             </Card.Actions>
           </Card>
@@ -214,12 +214,12 @@ const todayTraining = selectedDays[today];
         {programs.length > 0 && (
           <>
             <Divider style={styles.divider} />
-            <Text style={styles.sectionTitle}>Ohjelmasi 🎯</Text>
+            <Text style={styles.sectionTitle}>Your Programs 🎯</Text>
             {programs.slice(0, 3).map((program) => (
               <Card key={program.id} style={styles.card}>
                 <Card.Title
                   title={program.name}
-                  subtitle={`${program.days.length} päivää`}
+                  subtitle={`${program.days.length} days`}
                 />
                 <Card.Actions>
                   <Button
@@ -231,7 +231,7 @@ const todayTraining = selectedDays[today];
                       })
                     }
                   >
-                    Näytä
+                    View
                   </Button>
                 </Card.Actions>
               </Card>

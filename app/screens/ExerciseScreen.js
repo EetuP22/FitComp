@@ -31,7 +31,6 @@ export default function ExerciseScreen({ route }) {
     })();
   }, []);
 
-  // Handle search query from params
   useEffect(() => {
     const searchQuery = route?.params?.searchQuery;
     if (searchQuery) {
@@ -40,7 +39,6 @@ export default function ExerciseScreen({ route }) {
     }
   }, [route?.params?.searchQuery]);
 
-  // Auto-open first result when coming from exercise details search
   useEffect(() => {
     const autoOpenFirst = route?.params?.autoOpenFirst;
     if (autoOpenFirst && exercises.length > 0 && !loading) {
@@ -69,9 +67,7 @@ export default function ExerciseScreen({ route }) {
   const openDetail = (exercise) => {
     if (selectionMode && typeof onSelectExercise === 'function') {
       onSelectExercise(exercise);
-      // Clear params before navigating back
       navigation.setParams({ selectionMode: false, onSelectExercise: undefined });
-      // Navigate back to Programs tab
       navigation.getParent()?.navigate('Programs');
       return;
     }
@@ -99,7 +95,7 @@ export default function ExerciseScreen({ route }) {
               </Text>
             )}
             {selectionMode && (
-              <Text style={styles.selectHint}>Napauta valitaksesi</Text>
+              <Text style={styles.selectHint}>Click to select</Text>
             )}
           </Card.Content>
         </View>
@@ -109,7 +105,7 @@ export default function ExerciseScreen({ route }) {
   return (
     <View style={styles.container}>
       <Searchbar
-        placeholder="Hae liikkeitä..."
+        placeholder="Search exercises..."
         value={query}
         onChangeText={setQuery}
         onSubmitEditing={onSearchSubmit}
@@ -135,7 +131,7 @@ export default function ExerciseScreen({ route }) {
             </Chip>
           )}
           showsHorizontalScrollIndicator={false}
-          ListEmptyComponent={<Text style={{ marginLeft: 12, color: '#999' }}>Ladataan...</Text>}
+          ListEmptyComponent={<Text style={{ marginLeft: 12, color: '#999' }}>Loading...</Text>}
         />
       </View>
 
@@ -149,7 +145,7 @@ export default function ExerciseScreen({ route }) {
           contentContainerStyle={{ padding: 12 }}
         />
       ) : (
-        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>Ei liikkeitä löytynyt</Text>
+        <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>No exercises found</Text>
       )}
     </View>
   );

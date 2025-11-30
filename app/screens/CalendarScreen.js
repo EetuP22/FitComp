@@ -62,7 +62,7 @@ export default function CalendarScreen() {
           await deleteCalendarEntry(selectedDate);
           setSelectedDate('');
           setNote('');
-          setSnackbarMessage('Kalenterimerkintä poistettu!');
+          setSnackbarMessage('Calendar entry deleted!');
           setSnackbarVisible(true);
       } finally {
         setDeleting(false);
@@ -75,7 +75,7 @@ export default function CalendarScreen() {
         setMarking(true);
         try {
           await markCalendarEntryAsDone(selectedDate);
-          setSnackbarMessage('Treeni merkitty tehdyksi! ✅');
+          setSnackbarMessage('Training marked as done! ✅');
           setSnackbarVisible(true);
       } finally {
         setMarking(false);
@@ -87,7 +87,7 @@ export default function CalendarScreen() {
         setSavingNote(true);
         try {
           await updateCalendarNotes(selectedDate, note);
-          setSnackbarMessage('Muistiinpanot tallennettu!');
+          setSnackbarMessage('Notes saved!');
           setSnackbarVisible(true);
       } finally {
         setSavingNote(false);
@@ -128,7 +128,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <CustAppBar title="Treenikalenteri" />
+      <CustAppBar title="Training Calendar" />
 
       <Calendar
         onDayPress={(day) => setSelectedDate(day.dateString)}
@@ -142,10 +142,10 @@ export default function CalendarScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {!selectedDate ? (
-          <Text style={styles.text}>Valitse päivä kalenterista 📅</Text>
+          <Text style={styles.text}>Select a day from the calendar 📅</Text>
         ) : assigned ? (
           <>
-            <Text style={styles.text}>Tälle päivälle on liitetty treenipäivä ✅</Text>
+            <Text style={styles.text}>A training day is assigned to this date ✅</Text>
 
             <Button
               mode="contained"
@@ -154,7 +154,7 @@ export default function CalendarScreen() {
               style={styles.button}
               disabled={marking || savingNote || deleting || assigning}
             >
-              Avaa liitetty treeni
+              Open assigned training
             </Button>
 
             <Button
@@ -166,12 +166,12 @@ export default function CalendarScreen() {
               buttonColor={isDone ? '#4CAF50' : undefined} 
               style={styles.button}
             >
-              {isDone ? 'Treeni merkitty tehdyksi ✅' : 'Merkitse treeni tehdyksi'}
+              {isDone ? 'Training marked as done ✅' : 'Mark training as done'}
             </Button>
                       
 
             <TextInput
-              label="Lisää muistiinpano"
+              label="Add a note"
               value={note}
               onChangeText={setNote}
               mode="outlined"
@@ -188,7 +188,7 @@ export default function CalendarScreen() {
              loading={savingNote}
              disabled={savingNote || marking || assigning}
             >
-              Tallenna muistiinpano
+              Save note
             </Button>
 
             <Button 
@@ -200,12 +200,12 @@ export default function CalendarScreen() {
             loading={deleting}
             disabled={deleting || assigning || marking}
             >
-              Poista liitetty treeni
+              Remove assigned training
             </Button>
           </>
         ) : (
           <>
-            <Text style={styles.text}>Ei liitettyä treeniä. Valitse ohjelmapäivä:</Text>
+            <Text style={styles.text}>No training assigned. Select a program day:</Text>
 
             <Button 
             mode="contained" 
@@ -215,7 +215,7 @@ export default function CalendarScreen() {
             loading={assigning}
             disabled={assigning}
             >
-              Valitse ohjelmapäivä
+              Select program day
             </Button>
           </>
         )}
@@ -224,7 +224,7 @@ export default function CalendarScreen() {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modal}>
           <View style={styles.modalContent}>
-            <Text style={styles.text}>Valitse ohjelmapäivä:</Text>
+            <Text style={styles.text}>Select a program day:</Text>
 
               <FlatList
               data={programs.flatMap((p) =>
@@ -241,7 +241,7 @@ export default function CalendarScreen() {
                           await onSelectProgramDay(selectedDate, item.programId, item.id);
                         }}
                       >
-                        Valitse
+                        Select
                       </Button>
                     )}
                   />
@@ -250,7 +250,7 @@ export default function CalendarScreen() {
             />
 
             <Button mode="text" onPress={() => setModalVisible(false)} icon="close">
-              Sulje
+              Close
             </Button>
           </View>
         </View>

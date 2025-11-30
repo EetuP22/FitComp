@@ -18,17 +18,17 @@ export default function ProgramStack() {
       <Stack.Screen
         name="ProgramsList"
         component={ProgramScreen}
-        options={{ title: 'Treeniohjelmat' }}
+        options={{ title: 'Training Programs' }}
       />
       <Stack.Screen
         name="ProgramDetail"
         component={ProgramDetailScreen}
-        options={{ title: 'Ohjelma' }}
+        options={{ title: 'Program' }}
       />
       <Stack.Screen
         name="DayDetail"
         component={DayDetailScreen}
-        options={{ title: 'Treenipäivä' }}
+        options={{ title: 'Workout Day' }}
       />
     </Stack.Navigator>
   );

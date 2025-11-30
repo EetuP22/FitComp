@@ -29,13 +29,13 @@ export default function ProgramScreen({ navigation}) {
 
   const renderProgram = ({ item }) => (
     <Card style={styles.card}>
-      <Card.Title title={item.name} subtitle={item.desc || 'Ei kuvausta'} />
+      <Card.Title title={item.name} subtitle={item.desc || 'No description'} />
       <Card.Actions style={styles.cardActions}>
         <Button mode="outlined" onPress={() => openProgram(item.id)}>
-          Avaa
+          Open
         </Button>
         <Button mode="text" onPress={() => handleDeleteProgram(item.id)} textColor="#e53935">
-          Poista
+          Delete
         </Button>
       </Card.Actions>
     </Card>
@@ -51,17 +51,17 @@ export default function ProgramScreen({ navigation}) {
      return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.text}>Luo uusi ohjelma 🏋️‍♂️</Text>
+        <Text style={styles.text}>Create new program 🏋️‍♂️</Text>
 
         <TextInput 
-        label="Ohjelman nimi" 
+        label="Program name" 
         value={programName} 
         onChangeText={setProgramName} 
         mode='outlined' 
         style={styles.input} 
         />
         <TextInput 
-        label="Kuvaus" 
+        label="Description" 
         value={programDesc} 
         onChangeText={setProgramDesc} 
         mode='outlined' 
@@ -73,14 +73,14 @@ export default function ProgramScreen({ navigation}) {
         style={styles.button} 
         icon="plus"
         >
-          Lisää ohjelma
+          Add Program
         </Button>
 
         <FlatList
           data={programs}
           keyExtractor={(item) => item.id}
           renderItem={renderProgram}
-          ListEmptyComponent={<Text style={styles.emptyText}>Ei ohjelmia vielä.</Text>}
+          ListEmptyComponent={<Text style={styles.emptyText}>No programs yet.</Text>}
         />
       </View>
       

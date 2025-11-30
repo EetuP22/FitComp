@@ -16,7 +16,7 @@ export default function DayDetailScreen({ route }) {
   if (!day) {
     return (
       <View style={styles.container}>
-        <Text style={styles.error}>Virhe: Päivää ei löytynyt.</Text>
+        <Text style={styles.error}>Error: Day not found.</Text>
       </View>
     );
   }
@@ -33,7 +33,7 @@ export default function DayDetailScreen({ route }) {
         selectionMode: true,
         onSelectExercise: (exercise) => {
           addExercise(programId, dayId, exercise.name);
-          setSnackbarMessage(`${exercise.name} lisätty treenipäivään!`);
+          setSnackbarMessage(`${exercise.name} added to workout!`);
           setSnackbarVisible(true);
         },
       }
@@ -59,18 +59,18 @@ export default function DayDetailScreen({ route }) {
           onPress={() => openExerciseDetail(item.name)}
           icon="information-outline"
         >
-          Tiedot
+          Details
         </Button>
         <Button
           mode="text"
           textColor="#e53935"
           onPress={() => {
             deleteExercise(programId, dayId, item.id);
-            setSnackbarMessage(`${item.name} poistettu treenipäivästä.`);
+            setSnackbarMessage(`${item.name} removed from workout.`);
             setSnackbarVisible(true);
           }}
         >
-          Poista
+          Remove
         </Button>
       </Card.Actions>
     </Card>
@@ -80,7 +80,7 @@ export default function DayDetailScreen({ route }) {
     <View style={styles.container}>
         <Text style={styles.title}>{day.name}</Text>
       <View style={styles.content}>
-        <Text style={styles.subtitle}>Lisää harjoituksia tälle päivälle 🏋️</Text>
+        <Text style={styles.subtitle}>Add exercises to this day 🏋️</Text>
         
         <Button
           mode="contained"
@@ -88,14 +88,14 @@ export default function DayDetailScreen({ route }) {
           icon="magnify"
           style={styles.button}
         >
-          Selaa liikepankkia
+          Browse Exercise Library
         </Button>
 
         <Divider style={styles.divider} />
-        <Text style={styles.orText}>tai kirjoita nimi manuaalisesti</Text>
+        <Text style={styles.orText}>or enter name manually</Text>
         
         <TextInput
-          label="Liikkeen nimi"
+          label="Exercise name"
           value={exerciseName}
           onChangeText={setExerciseName}
           mode="outlined"
@@ -107,14 +107,14 @@ export default function DayDetailScreen({ route }) {
           icon="plus"
           style={styles.button}
         >
-          Lisää liike
+          Add Exercise
         </Button>
         <FlatList
           data={day.exercises || []}
           keyExtractor={(item) => item.id}
           renderItem={renderExercise}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Ei vielä harjoituksia. Lisää yllä!</Text>
+            <Text style={styles.emptyText}>No exercises yet. Add one above!</Text>
           }
         />
       </View>

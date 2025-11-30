@@ -42,8 +42,8 @@ export default function ExerciseDetailScreen({ route, navigation }) {
   if (!exercise) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Liikettä ei löytynyt</Text>
-        <Button onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>Sulje</Button>
+        <Text>Exercise not found</Text>
+        <Button onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>Close</Button>
       </View>
     );
   }
@@ -60,7 +60,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
 
         {exercise.images && exercise.images.length > 0 && (
           <View style={styles.imagesContainer}>
-            <Text style={styles.imagesTitle}>Kuvat:</Text>
+            <Text style={styles.imagesTitle}>Images:</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagesRow}>
               {exercise.images.map((uri, idx) => (
                 <Image key={idx} source={{ uri }} style={styles.image} />
@@ -72,16 +72,16 @@ export default function ExerciseDetailScreen({ route, navigation }) {
         <Card.Content>
           {exercise.muscles && exercise.muscles.length > 0 && (
             <Text style={styles.info}>
-              💪 Lihakset: {exercise.muscles.map(m => muscleMap.get(Number(m)) || m).join(', ')}
+              💪 Muscles: {exercise.muscles.map(m => muscleMap.get(Number(m)) || m).join(', ')}
             </Text>
           )}
           {exercise.equipment && exercise.equipment.length > 0 && (
-            <Text style={styles.info}>🛠️ Välineet: {exercise.equipment.join(', ')}</Text>
+            <Text style={styles.info}>🛠️ Equipment: {exercise.equipment.join(', ')}</Text>
           )}
         </Card.Content>
 
         <Card.Actions style={styles.actions}>
-          <Button mode="contained" onPress={() => navigation.goBack()}>Sulje</Button>
+          <Button mode="contained" onPress={() => navigation.goBack()}>Close</Button>
         </Card.Actions>
       </Card>
     </ScrollView>
