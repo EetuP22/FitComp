@@ -9,12 +9,10 @@ export const ExerciseProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const searchExercises = async (filters = {}) => {
-    console.log('🎯 ExerciseProvider.searchExercises called with:', filters);
     setLoading(true);
     setError(null);
     try {
       const data = await exerciseRepo.getExercises(filters);
-      console.log('🎯 ExerciseProvider received data:', data?.length || 0, 'exercises');
       setExercises(data);
     } catch (err) {
       setError(err.message);
@@ -73,4 +71,3 @@ export const useExercise = () => {
 };
 
 
-// ota myöhemmin käyttöön!

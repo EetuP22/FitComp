@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { Card, Button, TextInput, Text, Divider } from 'react-native-paper';
+import { Card, Button, TextInput, Text, Divider, Snackbar } from 'react-native-paper';
 import { useProgram } from '../context/ProgramProvider';
 import { useNavigation } from '@react-navigation/native';
 
@@ -10,6 +10,8 @@ export default function DayDetailScreen({ route }) {
   const navigation = useNavigation();
   const day = getDayById(programId, dayId);
   const [exerciseName, setExerciseName] = useState('');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   if (!day) {
     return (
@@ -25,17 +27,25 @@ export default function DayDetailScreen({ route }) {
   };
 
   const handleBrowseLibrary = () => {
-    // Navigate to exercise library in selection mode
     navigation.navigate('Exercises', {
       screen: 'ExerciseList',
       params: {
         selectionMode: true,
         onSelectExercise: (exercise) => {
-          // Add selected exercise to this day
           addExercise(programId, dayId, exercise.name);
-          // Navigate back
-          navigation.goBack();
-        }
+          setSnackbarMessage(`${exercise.name} lisätty treenipäivään!`);
+          setSnackbarVisible(true);
+        },
+      }
+    });
+  };
+
+  const openExerciseDetail = async (exerciseName) => {
+    navigation.navigate('Exercises', {
+      screen: 'ExerciseList',
+      params: {
+        searchQuery: exerciseName,
+        autoOpenFirst: true
       }
     });
   };
@@ -45,9 +55,20 @@ export default function DayDetailScreen({ route }) {
       <Card.Title title={item.name} />
       <Card.Actions style={styles.cardActions}>
         <Button
+          mode="outlined"
+          onPress={() => openExerciseDetail(item.name)}
+          icon="information-outline"
+        >
+          Tiedot
+        </Button>
+        <Button
           mode="text"
           textColor="#e53935"
-          onPress={() => deleteExercise(programId, dayId, item.id)}
+          onPress={() => {
+            deleteExercise(programId, dayId, item.id);
+            setSnackbarMessage(`${item.name} poistettu treenipäivästä.`);
+            setSnackbarVisible(true);
+          }}
         >
           Poista
         </Button>
@@ -61,7 +82,6 @@ export default function DayDetailScreen({ route }) {
       <View style={styles.content}>
         <Text style={styles.subtitle}>Lisää harjoituksia tälle päivälle 🏋️</Text>
         
-        {/* Browse Library Button */}
         <Button
           mode="contained"
           onPress={handleBrowseLibrary}
@@ -74,7 +94,6 @@ export default function DayDetailScreen({ route }) {
         <Divider style={styles.divider} />
         <Text style={styles.orText}>tai kirjoita nimi manuaalisesti</Text>
         
-        {/* Manual Input */}
         <TextInput
           label="Liikkeen nimi"
           value={exerciseName}
@@ -99,6 +118,17 @@ export default function DayDetailScreen({ route }) {
           }
         />
       </View>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        action={{
+          label: 'OK',
+          onPress: () => setSnackbarVisible(false),
+        }}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }

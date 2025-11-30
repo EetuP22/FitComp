@@ -81,10 +81,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
         </Card.Content>
 
         <Card.Actions style={styles.actions}>
-          <Button onPress={() => navigation.goBack()}>Sulje</Button>
-          <Button mode="contained" onPress={() => {/* Lisää ohjelmaan */}}>
-            Lisää ohjelmaan
-          </Button>
+          <Button mode="contained" onPress={() => navigation.goBack()}>Sulje</Button>
         </Card.Actions>
       </Card>
     </ScrollView>

@@ -11,33 +11,19 @@ const stripHtml = (html = '') =>
 
 export const exerciseService = {
   async fetchExercises({ search = '', muscle = null, page = 1, limit = 50 } = {}) {
-    console.log(`🔍 fetchExercises called with:`, { search, muscle, page, limit });
-    
     const params = new URLSearchParams();
     params.append('limit', String(200)); 
     if (muscle) params.append('muscles', String(muscle));
 
     const url = `${BASE}/exerciseinfo/?${params.toString()}`;
-    console.log(`📡 Fetching from: ${url}`);
     
     try {
       const json = await safeFetchJson(url);
-      console.log(`📦 Raw API response: ${json.results?.length || 0} exercises`);
-      
-      if (json.results && json.results.length > 0) {
-        const first = json.results[0];
-        console.log(`🔬 First exercise from exerciseinfo:`, {
-          id: first.id,
-          translations: first.translations?.length || 0,
-          first_translation: first.translations?.[0]?.name,
-        });
-      }
       
       let exercises = (json.results || []).map((e) => {
         const englishTranslation = e.translations?.find(t => t.language === 2);
         
         if (!englishTranslation) {
-          console.log(`⚠️ No English translation for exercise ${e.id}`);
           return null; 
         }
         
@@ -52,13 +38,23 @@ export const exerciseService = {
           ? e.equipment.map(eq => typeof eq === 'object' ? eq.id : eq)
           : [];
 
+        // Map possible images (exerciseinfo sometimes contains image objects)
+        const imageUrls = Array.isArray(e.images)
+          ? e.images
+              .map(img => {
+                const url = img.image;
+                return url ? (url.startsWith('http') ? url : `https://wger.de${url}`) : null;
+              })
+              .filter(Boolean)
+          : [];
+
         return {
           wger_id: e.id,
           name,
           description,
           muscles: muscleIds,
           equipment: equipmentIds,
-          images: [], 
+          images: imageUrls,
         };
       }).filter(e => e !== null); 
       
@@ -70,12 +66,8 @@ export const exerciseService = {
         );
       }
       
-      console.log(`🔎 After filtering: ${exercises.length} exercises`);
-      
       const start = (page - 1) * limit;
       const paginatedExercises = exercises.slice(start, start + limit);
-      
-      console.log(`📄 Returning page ${page}: ${paginatedExercises.length} exercises`);
 
       return { 
         results: paginatedExercises, 
@@ -83,8 +75,7 @@ export const exerciseService = {
         count: exercises.length
       };
     } catch (error) {
-      console.error('❌ wger API failed:', error.message);
-      console.error('❌ Full error:', error);
+      console.error('wger API failed:', error.message);
       return { results: [], next: null, count: 0 };
     }
   },
@@ -154,3 +145,4 @@ export const exerciseService = {
       .sort((a, b) => a.name.localeCompare(b.name));
   },
 };
+

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { Searchbar, Chip, Card, Text, ActivityIndicator } from 'react-native-paper';
 import { useExercise } from '../context/ExerciseProvider';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { exerciseRepo } from '../repositories/exerciseRepo';
 import { exerciseService } from '../services/exerciseService';
 
@@ -14,12 +14,12 @@ export default function ExerciseScreen({ route }) {
   const [selectedMuscle, setSelectedMuscle] = useState(null);
   const navigation = useNavigation();
 
-  // Check if we're in selection mode
-  const selectionMode = route?.params?.selectionMode || false;
+  const selectionMode = route?.params?.selectionMode === true;
   const onSelectExercise = route?.params?.onSelectExercise;
 
  useEffect(() => {
     searchExercises({ search: '', page: 1, limit: 30 });
+    
     (async () => {
       try {
         const m = await exerciseService.fetchMuscles();
@@ -30,6 +30,25 @@ export default function ExerciseScreen({ route }) {
       }
     })();
   }, []);
+
+  // Handle search query from params
+  useEffect(() => {
+    const searchQuery = route?.params?.searchQuery;
+    if (searchQuery) {
+      setQuery(searchQuery);
+      searchExercises({ search: searchQuery, page: 1, limit: 30 });
+    }
+  }, [route?.params?.searchQuery]);
+
+  // Auto-open first result when coming from exercise details search
+  useEffect(() => {
+    const autoOpenFirst = route?.params?.autoOpenFirst;
+    if (autoOpenFirst && exercises.length > 0 && !loading) {
+      const firstExercise = exercises[0];
+      navigation.navigate('ExerciseDetail', { id: firstExercise.id });
+      navigation.setParams({ autoOpenFirst: false });
+    }
+  }, [exercises, loading, route?.params?.autoOpenFirst]);
 
   const onSearchSubmit = () => {
     if (query.trim()) {
@@ -48,31 +67,42 @@ export default function ExerciseScreen({ route }) {
   };
 
   const openDetail = (exercise) => {
-    // If in selection mode, call the callback
-    if (selectionMode && onSelectExercise) {
+    if (selectionMode && typeof onSelectExercise === 'function') {
       onSelectExercise(exercise);
-    } else {
-      // Normal mode: navigate to detail
-      navigation.navigate('ExerciseDetail', { id: exercise.id });
+      // Clear params before navigating back
+      navigation.setParams({ selectionMode: false, onSelectExercise: undefined });
+      // Navigate back to Programs tab
+      navigation.getParent()?.navigate('Programs');
+      return;
     }
+    navigation.navigate('ExerciseDetail', { id: exercise.id });
   };
 
  const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => openDetail(item)}>
       <Card style={styles.card}>
-        <Card.Content style={styles.cardContent}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.name}
-          </Text>
-          {item.muscles?.length > 0 && (
-            <Text style={styles.subtitle} numberOfLines={1}>
-              {item.muscles.map((m) => muscleMap.get(Number(m)) || m).join(', ')}
+        <View style={styles.cardRow}>
+          {item.images?.length > 0 && (
+            <Image 
+              source={{ uri: item.images[0] }} 
+              style={styles.thumbnail}
+              resizeMode="cover"
+            />
+          )}
+          <Card.Content style={styles.cardContent}>
+            <Text style={styles.title} numberOfLines={2}>
+              {item.name}
             </Text>
-          )}
-          {selectionMode && (
-            <Text style={styles.selectHint}>Napauta valitaksesi</Text>
-          )}
-        </Card.Content>
+            {item.muscles?.length > 0 && (
+              <Text style={styles.subtitle} numberOfLines={1}>
+                {item.muscles.map((m) => muscleMap.get(Number(m)) || m).join(', ')}
+              </Text>
+            )}
+            {selectionMode && (
+              <Text style={styles.selectHint}>Napauta valitaksesi</Text>
+            )}
+          </Card.Content>
+        </View>
       </Card>
     </TouchableOpacity>
   );
@@ -83,6 +113,11 @@ export default function ExerciseScreen({ route }) {
         value={query}
         onChangeText={setQuery}
         onSubmitEditing={onSearchSubmit}
+        onClearIconPress={() => {
+          setQuery('');
+          searchExercises({ search: '', page: 1, limit: 30 });
+          navigation.setParams({ searchQuery: undefined });
+        }}
         style={styles.search}
       />
       <View style={styles.chipsRow}>
@@ -126,7 +161,9 @@ const styles = StyleSheet.create({
   chipsRow: { paddingHorizontal: 12, paddingBottom: 6, maxHeight: 60 },
   chip: { marginRight: 8 },
   card: { marginBottom: 10 },
-  cardContent: { paddingVertical: 12 },
+  cardRow: { flexDirection: 'row', alignItems: 'center' },
+  thumbnail: { width: 80, height: 80, borderTopLeftRadius: 12, borderBottomLeftRadius: 12, backgroundColor: '#eee' },
+  cardContent: { flex: 1, paddingVertical: 12 },
   title: { fontSize: 16, fontWeight: '600', color: '#212121' },
   subtitle: { fontSize: 12, color: '#666', marginTop: 6 },
   selectHint: { 

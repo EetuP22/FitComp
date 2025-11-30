@@ -16,10 +16,8 @@ const mapRowToExercise = (row) => ({
 
 export const exerciseRepo = {
   async getExercises({ search = '', muscle = null, page = 1, limit = 30 } = {}) {
-    console.log('📚 exerciseRepo.getExercises called with:', { search, muscle, page, limit });
     try {
       const res = await exerciseService.fetchExercises({ search, muscle, page, limit });
-      console.log('📚 exerciseRepo received from service:', res.results?.length || 0, 'exercises');
       const db = getDb();
 
       if (db && typeof db.runAsync === 'function') {
@@ -61,10 +59,9 @@ export const exerciseRepo = {
         images: r.images || [], 
       }));
       
-      console.log('📚 exerciseRepo returning:', mapped.length, 'exercises');
       return mapped;
     } catch (error) {
-      console.error('❌ exerciseRepo.getExercises error:', error);
+      console.error('exerciseRepo.getExercises error:', error);
       return [];
     }
   },
