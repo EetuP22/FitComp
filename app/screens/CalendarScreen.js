@@ -6,6 +6,7 @@ import { Button, Card, TextInput, Snackbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useProgram } from '../context/ProgramProvider';
 import { useCalendar } from '../context/CalendarProvider';
+import { useWorkoutLog } from '../context';
 
 export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = React.useState('');
@@ -33,6 +34,7 @@ export default function CalendarScreen() {
       markCalendarEntryAsDone,
       updateCalendarNotes,
     } = useCalendar();
+    const { workoutLogs } = useWorkoutLog();
 
     useEffect(() => {
       if (!selectedDate) {
@@ -109,13 +111,27 @@ export default function CalendarScreen() {
 
     const markedDates = useMemo(() => {
     const map = {};
+    const loggedDates = new Set(workoutLogs?.map(log => log.date) || []);
+    
     Object.keys(selectedDays || {}).forEach((d) => {
       const entry = selectedDays[d];
+      const hasLogs = loggedDates.has(d);
       map[d] = {
         marked: true,
         dotColor: entry.done ? '#4CAF50' : '#2196f3',
+        dots: hasLogs ? [{ key: 'workout', color: '#FF9800' }] : undefined,
       };
     });
+    
+    loggedDates.forEach((date) => {
+      if (!map[date]) {
+        map[date] = {
+          marked: true,
+          dotColor: '#FF9800',
+        };
+      }
+    });
+    
     if (selectedDate) {
       map[selectedDate] = {
         ...(map[selectedDate] || {}),
@@ -124,7 +140,7 @@ export default function CalendarScreen() {
       };
     }
     return map;
-  }, [selectedDays, selectedDate, isDone]);
+  }, [selectedDays, selectedDate, isDone, workoutLogs]);
 
   return (
     <View style={styles.container}>

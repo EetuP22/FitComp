@@ -1,14 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Image, StyleSheet } from 'react-native';
-import { Text, Button, Card, ActivityIndicator } from 'react-native-paper';
+import { Text, Button, Card, ActivityIndicator, Divider } from 'react-native-paper';
 import { exerciseRepo } from '../repositories/exerciseRepo';
 import { exerciseService } from '../services/exerciseService';
+import { useWorkoutLog } from '../context';
 
 export default function ExerciseDetailScreen({ route, navigation }) {
-  const { id } = route.params || {};
+  const { id, returnTo, programId, dayId } = route.params || {};
   const [exercise, setExercise] = useState(null);
   const [loading, setLoading] = useState(true);
   const [muscleMap, setMuscleMap] = useState(new Map());
+  const [exerciseLogs, setExerciseLogs] = useState([]);
+  const { getLogsByExercise } = useWorkoutLog();
+
+  const handleClose = () => {
+    if (returnTo === 'DayDetail' && programId && dayId) {
+      navigation.navigate('Programs', {
+        screen: 'DayDetail',
+        params: { programId, dayId }
+      });
+    } else {
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -20,6 +34,11 @@ export default function ExerciseDetailScreen({ route, navigation }) {
         setExercise(e);
         const m = await exerciseService.fetchMuscles();
         setMuscleMap(new Map(m.map(mm => [Number(mm.id), mm.name])));
+        
+        const logs = await getLogsByExercise(e.name);
+        if (mounted) {
+          setExerciseLogs(logs.slice(0, 3));
+        }
       } catch (err) {
         console.error('ExerciseDetail load error', err);
       } finally {
@@ -29,7 +48,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, getLogsByExercise]);
 
   if (loading) {
     return (
@@ -43,7 +62,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Exercise not found</Text>
-        <Button onPress={() => navigation.goBack()} style={{ marginTop: 12 }}>Close</Button>
+        <Button onPress={handleClose} style={{ marginTop: 12 }}>Close</Button>
       </View>
     );
   }
@@ -80,8 +99,37 @@ export default function ExerciseDetailScreen({ route, navigation }) {
           )}
         </Card.Content>
 
+        {exerciseLogs.length > 0 && (
+          <View>
+            <Divider style={{ marginVertical: 16 }} />
+            <Card.Content>
+              <Text style={styles.title}>Recent Workouts</Text>
+              {exerciseLogs.map((log, idx) => (
+                <View key={log.id} style={styles.logItem}>
+                  <Text style={styles.logDate}>{log.date}</Text>
+                  <View style={styles.logDetails}>
+                    {log.sets && <Text style={styles.logDetail}>{log.sets} sets</Text>}
+                    {log.reps && <Text style={styles.logDetail}>× {log.reps} reps</Text>}
+                    {log.weight && <Text style={styles.logDetail}>@ {log.weight} kg</Text>}
+                  </View>
+                  {log.notes && <Text style={styles.logNotes}>📝 {log.notes}</Text>}
+                  {idx < exerciseLogs.length - 1 && <Divider style={{ marginTop: 8 }} />}
+                </View>
+              ))}
+            </Card.Content>
+            <Card.Actions style={styles.actions}>
+              <Button 
+                mode="outlined" 
+                onPress={() => navigation.navigate('Progress')}
+              >
+                View Full History
+              </Button>
+            </Card.Actions>
+          </View>
+        )}
+
         <Card.Actions style={styles.actions}>
-          <Button mode="contained" onPress={() => navigation.goBack()}>Close</Button>
+          <Button mode="contained" onPress={handleClose}>Close</Button>
         </Card.Actions>
       </Card>
     </ScrollView>
@@ -99,4 +147,9 @@ const styles = StyleSheet.create({
   image: { width: 200, height: 150, marginRight: 12, borderRadius: 8, backgroundColor: '#eee' },
   info: { fontSize: 14, color: '#555', marginBottom: 6 },
   actions: { justifyContent: 'flex-end', paddingTop: 12 },
+  logItem: { paddingVertical: 8 },
+  logDate: { fontSize: 12, color: '#666', marginBottom: 4 },
+  logDetails: { flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginBottom: 4 },
+  logDetail: { fontSize: 14, color: '#555', fontWeight: '500' },
+  logNotes: { fontSize: 12, color: '#666', fontStyle: 'italic' },
 });

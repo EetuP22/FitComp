@@ -41,19 +41,60 @@ export default function DayDetailScreen({ route }) {
   };
 
   const openExerciseDetail = async (exerciseName) => {
-    navigation.navigate('Exercises', {
-      screen: 'ExerciseList',
-      params: {
-        searchQuery: exerciseName,
-        autoOpenFirst: true
+    try {
+      const { exerciseRepo } = require('../repositories/exerciseRepo');
+      const results = await exerciseRepo.getExercises({ search: exerciseName, limit: 50 });
+      
+      const exactMatch = results.find(ex => 
+        ex.name.toLowerCase() === exerciseName.toLowerCase()
+      );
+      
+      if (exactMatch) {
+        navigation.navigate('Exercises', {
+          screen: 'ExerciseDetail',
+          params: { 
+            id: exactMatch.id,
+            returnTo: 'DayDetail',
+            programId: programId,
+            dayId: dayId
+          }
+        });
+      } else if (results.length > 0) {
+        navigation.navigate('Exercises', {
+          screen: 'ExerciseDetail',
+          params: { 
+            id: results[0].id,
+            returnTo: 'DayDetail',
+            programId: programId,
+            dayId: dayId
+          }
+        });
+      } else {
+        setSnackbarMessage(`No details found for ${exerciseName}`);
+        setSnackbarVisible(true);
       }
-    });
+    } catch (err) {
+      console.error('Error opening exercise detail:', err);
+      setSnackbarMessage('Failed to load exercise details');
+      setSnackbarVisible(true);
+    }
   };
 
   const renderExercise = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.name} />
       <Card.Actions style={styles.cardActions}>
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('LogWorkout', { 
+            exerciseId: item.id, 
+            exerciseName: item.name 
+          })}
+          icon="dumbbell"
+          style={{ marginRight: 8 }}
+        >
+          Log
+        </Button>
         <Button
           mode="outlined"
           onPress={() => openExerciseDetail(item.name)}
@@ -122,10 +163,6 @@ export default function DayDetailScreen({ route }) {
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={3000}
-        action={{
-          label: 'OK',
-          onPress: () => setSnackbarVisible(false),
-        }}
       >
         {snackbarMessage}
       </Snackbar>
@@ -158,9 +195,12 @@ const styles = StyleSheet.create({
   button: { marginBottom: 20 },
   card: { marginBottom: 10, elevation: 2 },
   cardActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'flex-end',
     paddingRight: 8,
     paddingBottom: 8,
+    gap: 4,
   },
   emptyText: { textAlign: 'center', color: '#777', marginTop: 20 },
 });

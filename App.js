@@ -3,7 +3,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import MainNavigator from './app/navigation/MainNavigator';
 import { theme } from './app/styles/theme';
 import { initDatabase } from './app/db/database';
-import { ProgramProvider, CalendarProvider, ExerciseProvider } from './app/context';
+import { ProgramProvider, CalendarProvider, ExerciseProvider, WorkoutLogProvider } from './app/context';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function App() {
@@ -30,7 +30,9 @@ export default function App() {
       <ProgramProvider>
         <CalendarProvider>
           <ExerciseProvider>
-        <MainNavigator />
+            <WorkoutLogProvider>
+              <MainNavigator />
+            </WorkoutLogProvider>
           </ExerciseProvider>
         </CalendarProvider>
       </ProgramProvider>

@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ProgramScreen from '../screens/ProgramScreen';
 import ProgramDetailScreen from '../screens/ProgramDetailScreen';
 import DayDetailScreen from '../screens/DayDetailScreen';
+import LogWorkoutScreen from '../screens/LogWorkoutScreen';
 
 
 const Stack = createStackNavigator();
@@ -29,6 +30,11 @@ export default function ProgramStack() {
         name="DayDetail"
         component={DayDetailScreen}
         options={{ title: 'Workout Day' }}
+      />
+      <Stack.Screen
+        name="LogWorkout"
+        component={LogWorkoutScreen}
+        options={{ title: 'Log Workout' }}
       />
     </Stack.Navigator>
   );

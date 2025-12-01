@@ -94,6 +94,20 @@ export const initDatabase = async () => {
   );
 `);
 
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS workout_logs (
+        id TEXT PRIMARY KEY,
+        exercise_id TEXT,
+        exercise_name TEXT NOT NULL,
+        date TEXT NOT NULL,
+        sets INTEGER,
+        reps INTEGER,
+        weight REAL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
 
     await createCalendarTable();
 
@@ -285,4 +299,73 @@ export const dbUpdateCalendarNotes = async (date, notes) => {
     }
 
 };
+
+export const addWorkoutLog = async (id, exerciseId, exerciseName, date, sets, reps, weight, notes) => {
+    if (!db) return;
+    try {
+        await db.runAsync(
+            `INSERT INTO workout_logs (id, exercise_id, exercise_name, date, sets, reps, weight, notes) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+            [id, exerciseId, exerciseName, date, sets || null, reps || null, weight || null, notes || '']
+        );
+        console.log("✅ Workout log added:", exerciseName, date);
+    } catch (error) {
+        console.error("❌ Error adding workout log:", error);
+        throw error;
+    }
+};
+
+export const getWorkoutLogsByExercise = async (exerciseName) => {
+    if (!db) return [];
+    try {
+        const logs = await db.getAllAsync(
+            'SELECT * FROM workout_logs WHERE exercise_name = ? ORDER BY date DESC;',
+            [exerciseName]
+        );
+        return logs || [];
+    } catch (error) {
+        console.error("❌ Error fetching workout logs by exercise:", error);
+        return [];
+    }
+};
+
+export const getWorkoutLogsByDate = async (date) => {
+    if (!db) return [];
+    try {
+        const logs = await db.getAllAsync(
+            'SELECT * FROM workout_logs WHERE date = ? ORDER BY created_at DESC;',
+            [date]
+        );
+        return logs || [];
+    } catch (error) {
+        console.error("❌ Error fetching workout logs by date:", error);
+        return [];
+    }
+};
+
+export const getAllWorkoutLogs = async (limit = 100) => {
+    if (!db) return [];
+    try {
+        const logs = await db.getAllAsync(
+            'SELECT * FROM workout_logs ORDER BY date DESC, created_at DESC LIMIT ?;',
+            [limit]
+        );
+        return logs || [];
+    } catch (error) {
+        console.error("❌ Error fetching all workout logs:", error);
+        return [];
+    }
+};
+
+export const deleteWorkoutLog = async (id) => {
+    if (!db) return;
+    try {
+        await db.runAsync('DELETE FROM workout_logs WHERE id = ?;', [id]);
+        console.log("✅ Workout log deleted:", id);
+    } catch (error) {
+        console.error("❌ Error deleting workout log:", error);
+        throw error;
+    }
+};
+
 

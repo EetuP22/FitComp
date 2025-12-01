@@ -8,6 +8,7 @@ import { TouchableOpacity, Text } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import MapScreen from '../screens/MapScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import ProgressScreen from '../screens/ProgressScreen';
 import ExerciseStack from './ExerciseStack';
 import ProgramStack from './ProgramStack';
 
@@ -52,9 +53,9 @@ export default function MainNavigator() {
             backgroundColor: '#FFFFFF',
             borderTopColor: '#E0E0E0',
             borderTopWidth: 1,
-            paddingBottom: 6,
-            paddingTop: 8,
-            height: 60,
+            paddingBottom: 4,
+            paddingTop: 4,
+            height: 65,
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -90,6 +91,16 @@ export default function MainNavigator() {
             tabBarLabel: 'Calendar',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="calendar" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Progress"
+          component={ProgressScreen}
+          options={{
+            tabBarLabel: 'Progress',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="chart-line" color={color} size={size} />
             ),
           }}
         />

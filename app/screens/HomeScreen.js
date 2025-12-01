@@ -4,6 +4,7 @@ import { Text, Card, Button, ProgressBar, Divider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useProgram } from '../context/ProgramProvider';
 import { useCalendar } from '../context/CalendarProvider';
+import { useWorkoutLog } from '../context';
 import CustAppBar from '../components/CustAppBar';
 import { gymRepo } from '../repositories/gymRepo';
 
@@ -12,6 +13,7 @@ export default function HomeScreen() {
   const navigation = useNavigation();
   const { programs } = useProgram();
   const { selectedDays } = useCalendar();
+  const { workoutLogs } = useWorkoutLog();
   const [ favoriteGyms, setFavoriteGyms ] = React.useState([]);
 
   React.useEffect(() => {
@@ -61,6 +63,11 @@ const todayTraining = selectedDays[today];
   const completionRate =
     weeklyStats.total > 0 ? (weeklyStats.completed / weeklyStats.total) * 100 : 0;
 
+  const latestWorkout = useMemo(() => {
+    if (!workoutLogs || workoutLogs.length === 0) return null;
+    return workoutLogs[0];
+  }, [workoutLogs]);
+
   const navigateToCalendar = () => {
     navigation.navigate('Calendar');
   };
@@ -77,7 +84,7 @@ const todayTraining = selectedDays[today];
 
   return (
     <View style={styles.container}>
-      <CustAppBar title="FitComp" />
+      <CustAppBar title="FitComp - Your Fitness Companion" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.welcomeText}>Welcome to your fitness companion! 💪</Text>
@@ -167,14 +174,57 @@ const todayTraining = selectedDays[today];
 
         <Divider style={styles.divider} />
 
+        {latestWorkout && (
+          <>
+            <Text style={styles.sectionTitle}>Latest Workout 🏋️</Text>
+            <Card style={styles.card}>
+              <Card.Content>
+                <Text style={styles.dayName}>{latestWorkout.exercise_name}</Text>
+                <Text style={styles.exerciseCount}>
+                  {latestWorkout.date}
+                </Text>
+                <View style={styles.statsRow}>
+                  {latestWorkout.sets && (
+                    <Text style={styles.logDetail}>{latestWorkout.sets} sets</Text>
+                  )}
+                  {latestWorkout.reps && (
+                    <Text style={styles.logDetail}>× {latestWorkout.reps} reps</Text>
+                  )}
+                  {latestWorkout.weight && (
+                    <Text style={styles.logDetail}>@ {latestWorkout.weight} kg</Text>
+                  )}
+                </View>
+              </Card.Content>
+              <Card.Actions>
+                <Button mode="text" onPress={() => navigation.navigate('Progress')}>
+                  View All
+                </Button>
+              </Card.Actions>
+            </Card>
+            <Divider style={styles.divider} />
+          </>
+        )}
+
         <Text style={styles.sectionTitle}>Quick Actions ⚡</Text>
         <View style={styles.quickActionsGrid}>
+          <Card style={styles.quickActionCard}>
+            <Card.Content style={styles.quickActionContent}>
+              <Text style={styles.quickActionEmoji}>📊</Text>
+              <Text style={styles.quickActionText}>Progress</Text>
+            </Card.Content>
+            <Card.Actions style={styles.cardActions}>
+              <Button mode="text" onPress={() => navigation.navigate('Progress')} compact>
+                Open
+              </Button>
+            </Card.Actions>
+          </Card>
+
           <Card style={styles.quickActionCard}>
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>📅</Text>
               <Text style={styles.quickActionText}>Calendar</Text>
             </Card.Content>
-            <Card.Actions>
+            <Card.Actions style={styles.cardActions}>
               <Button mode="text" onPress={navigateToCalendar} compact>
                 Open
               </Button>
@@ -185,11 +235,8 @@ const todayTraining = selectedDays[today];
             <Card.Content style={styles.quickActionContent}>
               <Text style={styles.quickActionEmoji}>🗺️</Text>
               <Text style={styles.quickActionText}>Gym Map</Text>
-              {favoriteGymsCount > 0 && (
-                <Text style={styles.badgeText}>{favoriteGymsCount}</Text>
-              )}
             </Card.Content>
-            <Card.Actions>
+            <Card.Actions style={styles.cardActions}>
               <Button mode="text" onPress={navigateToFavoriteGyms} compact>
                 Open
               </Button>
@@ -203,41 +250,13 @@ const todayTraining = selectedDays[today];
               <Text style={styles.quickActionEmoji}>🏋️</Text>
               <Text style={styles.quickActionText}>Programs</Text>
             </Card.Content>
-            <Card.Actions>
+            <Card.Actions style={styles.cardActions}>
               <Button mode="text" onPress={navigateToPrograms} compact>
                 Open
               </Button>
             </Card.Actions>
           </Card>
         </View>
-
-        {programs.length > 0 && (
-          <>
-            <Divider style={styles.divider} />
-            <Text style={styles.sectionTitle}>Your Programs 🎯</Text>
-            {programs.slice(0, 3).map((program) => (
-              <Card key={program.id} style={styles.card}>
-                <Card.Title
-                  title={program.name}
-                  subtitle={`${program.days.length} days`}
-                />
-                <Card.Actions>
-                  <Button
-                    mode="outlined"
-                    onPress={() =>
-                      navigation.navigate('Programs', {
-                        screen: 'ProgramDetail',
-                        params: { programId: program.id },
-                      })
-                    }
-                  >
-                    View
-                  </Button>
-                </Card.Actions>
-              </Card>
-            ))}
-          </>
-        )}
 
         <View style={styles.spacing} />
       </ScrollView>
@@ -266,6 +285,10 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
     elevation: 2,
+  },
+  cardActions: {
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   dayName: {
     fontSize: 18,
@@ -304,6 +327,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 20,
+    gap: 12,
+    flexWrap: 'wrap',
   },
   statItem: {
     alignItems: 'center',
@@ -318,6 +343,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1E88E5',
   },
+  logDetail: {
+    fontSize: 14,
+    color: '#555',
+    fontWeight: '500',
+  },
   progressLabel: {
     fontSize: 14,
     fontWeight: '600',
@@ -330,31 +360,32 @@ const styles = StyleSheet.create({
   },
   quickActionsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 20,
     gap: 8,
   },
   quickActionCard: {
     flex: 1,
+    minWidth: '45%',
     elevation: 2,
-  },
-  badgeText: {
-    fontSize: 10,
-    color: '#FF6B6B',
-    fontWeight: '700',
-    marginTop: 4,
+    justifyContent: 'space-between',
   },
   quickActionContent: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    minHeight: 80,
+    justifyContent: 'center',
   },
   quickActionEmoji: {
     fontSize: 32,
     marginBottom: 8,
   },
   quickActionText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#212121',
+    textAlign: 'center',
   },
   spacing: {
     height: 40,
