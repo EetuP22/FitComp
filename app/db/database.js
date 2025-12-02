@@ -2,6 +2,7 @@ import * as SQLite from 'expo-sqlite';
 
 let db = null;
 
+// Alustaa tietokannan ja luo tarvittavat taulut
 export const initDatabase = async () => {
     try {
         db = await SQLite.openDatabaseAsync('fitcomp.db');
@@ -64,6 +65,7 @@ export const initDatabase = async () => {
       );
     `);
 
+    // Ei ole käytössä tällä hetkellä käyttöliittymässä!
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS favorite_exercises (
         id TEXT PRIMARY KEY,
@@ -84,6 +86,7 @@ export const initDatabase = async () => {
       );
     `);
 
+// Ei ole käytössä tällä hetkellä käyttöliittymässä!
     await db.execAsync(`
     CREATE TABLE IF NOT EXISTS custom_exercises (
       id TEXT PRIMARY KEY,
@@ -118,9 +121,10 @@ export const initDatabase = async () => {
   }
 };
 
+// Palauttaa tietokanta-instanssin
 export const getDb = () => db;
 
-
+// Ohjelmien CRUD-toiminnot
 export const getPrograms = async () => {
     if (!db) return [];
     try {
@@ -155,6 +159,7 @@ export const deleteProgram = async (id) => {
     }
 };
 
+// Päivien CRUD-toiminnot
 export const getDaysByProgram = async (programId) => {
     if (!db) return [];
     try {
@@ -187,6 +192,7 @@ export const deleteDayFromDb = async (id) => {
     }
 };
 
+// Harjoitusten CRUD-toiminnot
 export const getExercisesByDay = async (dayId) => {
     if (!db) return [];
     try {
@@ -220,6 +226,7 @@ export const deleteExerciseFromDb = async (id) => {
     }
 };
 
+// Kalenterin CRUD-toiminnot ja luontilauseet
 export const createCalendarTable = async () => {
     if (!db) return;
     try  {
@@ -300,6 +307,7 @@ export const dbUpdateCalendarNotes = async (date, notes) => {
 
 };
 
+// Harjoituslokien CRUD-toiminnot
 export const addWorkoutLog = async (id, exerciseId, exerciseName, date, sets, reps, weight, notes) => {
     if (!db) return;
     try {

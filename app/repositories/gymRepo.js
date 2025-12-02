@@ -1,7 +1,9 @@
 import { getDb } from '../db/database';
 
+// Muuttuja muistissa oleville suosikeille, jos tietokantaa ei ole käytettävissä
 let memoryFavorites = [];
 
+// Mapataan tietokantarivi kuntosaliobjektiksi
 const mapRowToGym = (row) => ({
     id: row.id,
     name: row.name,
@@ -12,6 +14,7 @@ const mapRowToGym = (row) => ({
     facilities: row.facilities ? JSON.parse(row.facilities) : [],
 });
 
+// Määritellään kuntosalirepositorio kuntosalien käsittelyyn
 export const gymRepo = {
   async saveFavoriteGym(gym) {
     try {
@@ -33,6 +36,7 @@ export const gymRepo = {
         return result;
       }
 
+      // Jos tietokantaa ei ole, tallenna muistiin
       const idx = memoryFavorites.findIndex((f) => f.id === gym.id);
       const copy = { ...gym, facilities: gym.facilities || [] };
       if (idx >= 0) memoryFavorites[idx] = copy;
@@ -44,7 +48,7 @@ export const gymRepo = {
     }
   },
 
- 
+ // Poista kuntosali suosikeista
   async removeFavoriteGym(gymId) {
     try {
         const db = getDb();
@@ -60,6 +64,7 @@ export const gymRepo = {
     }
   },
 
+  // Hae kaikki suosikkikuntosalit
   async getAllFavoriteGyms() {
     try {
         const db = getDb();
@@ -74,6 +79,7 @@ export const gymRepo = {
     }
   },
 
+  // Tarkista, onko kuntosali suosikeissa
   async isFavorited(gymId) {
     try {
         const db = getDb();

@@ -7,8 +7,7 @@ import CustAppBar from '../components/CustAppBar';
 import { gymService } from '../services/gymService';
 import { gymRepo } from '../repositories/gymRepo';
 
-
-
+// Näkymä kuntosalikartalle ja sijainnille
 export default function MapScreen({ route }) {
 
   const [location, setLocation] = useState(null);
@@ -22,6 +21,7 @@ export default function MapScreen({ route }) {
   const [ gyms, setGyms ] = useState ([]);
   const [searching, setSearching] = useState(false);
 
+  // Pyydä sijaintilupa ja hae käyttäjän sijainti
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -35,10 +35,12 @@ export default function MapScreen({ route }) {
         return;
       }
 
+      // Hae käyttäjän nykyinen sijainti
       const userLocation = await Location.getCurrentPositionAsync({});
       const lat = userLocation.coords.latitude;
       const lng = userLocation.coords.longitude;
 
+      // Aseta sijainti ja hae lähistön kuntosalit
       setLocation({
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
@@ -55,6 +57,7 @@ export default function MapScreen({ route }) {
       }
     };
 
+    // Hae lähistön kuntosalit
     const fetchNearbyGyms = async (lat, lng) => {
     try {
       setSearching(true);
@@ -69,6 +72,7 @@ export default function MapScreen({ route }) {
     }
     };
   
+    // Käsittele kuntosalien hakua nimen perusteella
   const handleSearch = async () => {
     if (!searchQuery.trim() || !location) return;
     try {
@@ -89,6 +93,7 @@ export default function MapScreen({ route }) {
     }
   };
 
+  // Palauta lähistön kuntosalit, jos hakukenttä tyhjä
   useEffect (() => {
     if (!location) return;
     if (searchQuery.trim() === '') {
@@ -99,6 +104,7 @@ export default function MapScreen({ route }) {
     }
   }, [searchQuery, location]);
 
+  // Suodata kuntosalit hakukyselyn perusteella
   const filteredGyms = searchQuery.trim()
     ? gyms.filter(
         (gym) =>
@@ -107,6 +113,7 @@ export default function MapScreen({ route }) {
       )
     : gyms;
 
+    // Käsittele suosikkikuntosalien lisääminen/poistaminen
   const toggleFavorite = async (gym) => {
     const isFavorited = favoriteGyms.some((fav) => fav.id === gym.id);
     try {
@@ -143,8 +150,10 @@ useEffect(() => {
    };
   }, [route?.params?.showFavorites]);
 
+  // Tarkista, onko kuntosali suosikeissa
   const isFavorited = (gymId) => favoriteGyms.some((fav) => fav.id === gymId);
 
+  // Renderöi latausindikaattori, virheviesti tai kartta
   if (loading) {
     return (
       <View style={styles.container}>
@@ -157,6 +166,7 @@ useEffect(() => {
     );
   }
 
+  // Näytä virheviesti, jos sijaintia ei saada
   if (error && !location) {
     return (
       <View style={styles.container}>
@@ -176,6 +186,7 @@ useEffect(() => {
     );
   }
 
+  // Päärenderöinti
   return (
     <View style={styles.container}>
       <CustAppBar title="Gyms 🗺️" />
@@ -326,6 +337,7 @@ useEffect(() => {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: {
     flex: 1,

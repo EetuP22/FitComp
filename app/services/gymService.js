@@ -1,7 +1,9 @@
+// Karttatipalvelu kuntosalien hakemiseen OpenStreetMapin Overpass API:n kautta
 const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
 
+// Laske maantieteellinen suorakulmio annetun pisteen ja säteen perusteella
 const getBoundingBox = (latitude, longitude, radiusKm = 5) => {
-  const latDelta = radiusKm / 111;
+  const latDelta = radiusKm / 111; // Noin 111 km per leveysaste
   const lngDelta =
     radiusKm / (111 * Math.cos((latitude * Math.PI) / 180));
 
@@ -13,9 +15,11 @@ const getBoundingBox = (latitude, longitude, radiusKm = 5) => {
   };
 };
 
+// Muodosta Overpassin bbox-merkkijono
 const formatBbox = (bbox) =>
   `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
 
+// Rakenna Overpass-kysely kuntosalien hakemiseen
 const buildOverpassQuery = (bbox) => {
   return `
     [out:json][timeout:25][bbox:${formatBbox(bbox)}];
@@ -31,6 +35,7 @@ const buildOverpassQuery = (bbox) => {
   `;
 };
 
+// Jäsennä Overpassin vastaus ja muodosta kuntosalien lista
 const parseOsmData = (data, userLat, userLng) => {
   const gyms = [];
   const processedIds = new Set();
@@ -50,6 +55,7 @@ const parseOsmData = (data, userLat, userLng) => {
     return R * c;
   };
 
+  // Käy läpi kaikki elementit ja muodosta kuntosaliobjektit
   if (data.elements) {
     data.elements.forEach((element) => {
       if (processedIds.has(element.id)) return;
@@ -81,6 +87,7 @@ const parseOsmData = (data, userLat, userLng) => {
 
       const distance = calculateDistance(lat, lng);
 
+      // Lisää kuntosali, jos se on määritellyn säteen sisällä
       if (distance <= 25) {
         gyms.push({
           id: `osm-${element.id}`,
@@ -97,10 +104,11 @@ const parseOsmData = (data, userLat, userLng) => {
       }
     });
   }
-
+  // Palauta kuntosalit etäisyyden mukaan lajiteltuna
   return gyms.sort((a, b) => a.distance - b.distance);
 };
 
+// Gym-palvelu kuntosalien hakemiseen Overpass API:sta
 export const gymService = {
   async searchGymsNearby(latitude, longitude, radiusKm = 5) {
     try {
@@ -132,6 +140,7 @@ export const gymService = {
     }
   },
 
+  // Hae kuntosaleja nimen perusteella tietyltä alueelta
   async searchGymsByName(query, latitude, longitude, radiusKm = 10) {
     try {
       const bbox = getBoundingBox(latitude, longitude, radiusKm);
@@ -148,6 +157,7 @@ export const gymService = {
 
       const text = await response.text();
 
+      // Tarkista, onko vastaus HTML (esim. virhesivu)
       if (text.trim().startsWith("<")) {
         throw new Error("Overpass returned HTML instead of JSON (rate limit or malformed query)");
       }
@@ -155,6 +165,7 @@ export const gymService = {
       const data = JSON.parse(text);
       const allGyms = parseOsmData(data, latitude, longitude);
 
+      // Suodata kuntosalit nimen perusteella
       return allGyms.filter(
         (gym) =>
           gym.name.toLowerCase().includes(query.toLowerCase()) ||

@@ -1,5 +1,6 @@
 import { MD3LightTheme as DefaultTheme } from 'react-native-paper';
 
+// Määrittele sovelluksen teema
 export const theme = {
   ...DefaultTheme,
   colors: {

@@ -1,14 +1,18 @@
+// haetaa wger.de API:sta harjoituksia ja lihaksia
 const BASE = 'https://wger.de/api/v2';
 
+// Turvallinen fetch JSON-datan hakemiseen
 async function safeFetchJson(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`wger API ${res.status} for ${url}`);
   return res.json();
 }
 
+// Poista HTML-tagit tekstistä
 const stripHtml = (html = '') =>
   (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
 
+// Määritellään exerciseService harjoitusten hakemiseen wgeristä
 export const exerciseService = {
   async fetchExercises({ search = '', muscle = null, page = 1, limit = 50 } = {}) {
     const params = new URLSearchParams();
@@ -19,7 +23,7 @@ export const exerciseService = {
     
     try {
       const json = await safeFetchJson(url);
-      
+      // Suodata ja muokkaa harjoitukset
       let exercises = (json.results || []).map((e) => {
         const englishTranslation = e.translations?.find(t => t.language === 2);
         
@@ -57,6 +61,7 @@ export const exerciseService = {
         };
       }).filter(e => e !== null); 
       
+      // Suodata hakusanan perusteella
       if (search) {
         const searchLower = search.toLowerCase();
         exercises = exercises.filter(e => 
@@ -68,6 +73,7 @@ export const exerciseService = {
       const start = (page - 1) * limit;
       const paginatedExercises = exercises.slice(start, start + limit);
 
+      // Palauta sivutettu tulosjoukko
       return { 
         results: paginatedExercises, 
         next: exercises.length > start + limit ? 'has_more' : null,
@@ -79,6 +85,7 @@ export const exerciseService = {
     }
   },
 
+  // Hae yksittäisen harjoituksen tiedot wgeristä
   async fetchExerciseDetail(wgerId) {
     if (!wgerId) throw new Error('wgerId required');
     
@@ -87,7 +94,7 @@ export const exerciseService = {
       const url = `${BASE}/exerciseinfo/${wgerId}/`;
       const exercise = await safeFetchJson(url);
       
-      
+      // Etsi englanninkielinen käännös
       const englishTranslation = exercise.translations?.find(t => t.language === 2);
       
       if (!englishTranslation) {
@@ -137,6 +144,7 @@ export const exerciseService = {
     }
   },
 
+  // Hae lihaslista wgeristä
   async fetchMuscles() {
     const json = await safeFetchJson(`${BASE}/muscle/?limit=200`);
     return (json.results || [])

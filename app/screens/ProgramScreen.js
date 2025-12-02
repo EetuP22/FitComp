@@ -3,14 +3,15 @@ import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Text, TextInput, Button, Card, Snackbar } from 'react-native-paper';
 import { useProgram } from '../context/ProgramProvider';
 
-
+// Näkymä ohjelmien hallinnalle
 export default function ProgramScreen({ navigation}) {
   const { programs, deleteProgram, addProgram, loading, error } = useProgram();
   const [ programName, setProgramName ] = useState('');
   const [ programDesc, setProgramDesc ] = useState('');
 
-   
 
+   
+  // Käsittele ohjelman lisääminen
     const handleAddProgram = () => {
       if (programName.trim() === '') return;
       addProgram(programName, programDesc);
@@ -18,15 +19,18 @@ export default function ProgramScreen({ navigation}) {
       setProgramDesc('');
     };
 
+    // Käsittele ohjelman poistaminen
     const handleDeleteProgram = (programId) => {
       deleteProgram(programId);
     }
 
+    // Avaa ohjelman yksityiskohdat
   const openProgram = (programId) => {
     navigation.navigate('ProgramDetail', { programId });
   };
 
 
+  // Renderöi ohjelman kortti
   const renderProgram = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.name} subtitle={item.desc || 'No description'} />
@@ -41,6 +45,7 @@ export default function ProgramScreen({ navigation}) {
     </Card>
   );
 
+  // Päärenderöinti
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -95,6 +100,7 @@ export default function ProgramScreen({ navigation}) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center'},

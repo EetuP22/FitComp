@@ -1,6 +1,7 @@
 import { getDb } from '../db/database';
 import { exerciseService } from '../services/exerciseService';
 
+// Mapataan tietokantarivi harjoitusobjektiksi
 const mapRowToExercise = (row) => ({
   id: row.id,
   wger_id: row.wger_id,
@@ -14,12 +15,14 @@ const mapRowToExercise = (row) => ({
   last_fetched: row.last_fetched,
 });
 
+// Määritellään harjoitusrepositorio harjoitusten käsittelyyn
 export const exerciseRepo = {
   async getExercises({ search = '', muscle = null, page = 1, limit = 30 } = {}) {
     try {
       const res = await exerciseService.fetchExercises({ search, muscle, page, limit });
       const db = getDb();
 
+      // Hae harjoitukset palvelusta ja tallenna ne paikalliseen tietokantaan
       if (db && typeof db.runAsync === 'function') {
         for (const item of res.results) {
           const id = `wger-${item.wger_id}`;
@@ -49,6 +52,7 @@ export const exerciseRepo = {
         }
       }
 
+      // Mapataan palvelun vastaus harjoitusobjekteiksi
       const mapped = (res.results || []).map((r) => ({
         id: `wger-${r.wger_id}`,
         wger_id: r.wger_id,
@@ -66,6 +70,7 @@ export const exerciseRepo = {
     }
   },
 
+  // Lisää mukautettu harjoitus paikalliseen tietokantaan
   async getExerciseById(localId) {
     const db = getDb();
 
@@ -77,6 +82,7 @@ export const exerciseRepo = {
     const wgerId = parseInt(String(localId).replace('wger-', ''), 10);
     const detail = await exerciseService.fetchExerciseDetail(wgerId);
 
+    // Tallenna haettu harjoitus paikalliseen tietokantaan
     if (db && typeof db.runAsync === 'function') {
       try {
         await db.runAsync(
@@ -101,6 +107,7 @@ export const exerciseRepo = {
       }
     }
 
+    // Palauta harjoitusobjekti
     return {
       id: `wger-${detail.wger_id}`,
       wger_id: detail.wger_id,

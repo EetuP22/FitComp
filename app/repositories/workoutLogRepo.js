@@ -1,3 +1,4 @@
+// Määritellään harjoituslokirepositorio harjoituslokien käsittelyyn
 import {
   addWorkoutLog as dbAddWorkoutLog,
   getWorkoutLogsByExercise,
@@ -6,6 +7,7 @@ import {
   deleteWorkoutLog as dbDeleteWorkoutLog,
 } from '../db/database';
 
+// Harjoituslokirepositorio
 export const workoutLogRepo = {
   async addWorkoutLog(id, exerciseId, exerciseName, date, sets, reps, weight, notes) {
     try {
@@ -16,6 +18,7 @@ export const workoutLogRepo = {
     }
   },
 
+  // Hae treenilokit harjoituksen nimen perusteella
   async getWorkoutLogsByExercise(exerciseName) {
     try {
       const logs = await getWorkoutLogsByExercise(exerciseName);
@@ -26,6 +29,7 @@ export const workoutLogRepo = {
     }
   },
 
+  // Hae treenilokit tietyn päivämäärän perusteella
   async getWorkoutLogsByDate(date) {
     try {
       const logs = await getWorkoutLogsByDate(date);
@@ -36,6 +40,7 @@ export const workoutLogRepo = {
     }
   },
 
+  // Hae kaikki treenilokit, rajoitettu määrä
   async getAllWorkoutLogs(limit = 100) {
     try {
       const logs = await getAllWorkoutLogs(limit);
@@ -46,6 +51,7 @@ export const workoutLogRepo = {
     }
   },
 
+  // Poista treeniloki
   async deleteWorkoutLog(id) {
     try {
       await dbDeleteWorkoutLog(id);

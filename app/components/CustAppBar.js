@@ -1,6 +1,7 @@
 import React from "react";
 import { Appbar } from "react-native-paper";
 
+// Custom app bar komponentti, joka voidaan käyttää eri ruuduilla
 const CustAppBar = ({ title, backAction, onMenuPress }) => {
     return (
         <Appbar.Header mode='small'>

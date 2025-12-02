@@ -1,17 +1,21 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { programRepo } from '../repositories/programRepo';
 
+// Luo konteksti treeniohjelmille
 const ProgramContext = createContext();
 
+// Tarjoaa treeniohjelmakontekstin lapsikomponenteille
 export const ProgramProvider = ({ children }) => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Lataa treeniohjelmat komponentin mountatessa
   useEffect(() => {
     loadPrograms();
   }, []);
 
+  // Lataa treeniohjelmat
   const loadPrograms = async () => {
     setLoading(true);
     setError(null);
@@ -26,6 +30,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Lisää uusi treeniohjelma
   const addProgram = async (programName, programDesc = '') => {
     const id = Date.now().toString();
     const name = programName.trim();
@@ -42,6 +47,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Poista treeniohjelma
   const deleteProgram = async (id) => {
     try {
       await programRepo.deleteProgram(id);
@@ -53,6 +59,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Lisää uusi päivä treeniohjelmaan
   const addDay = async (programId, dayName) => {
     const newId = Date.now().toString();
     const name = dayName.trim();
@@ -73,6 +80,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Poista päivä treeniohjelmasta
   const deleteDay = async (programId, dayId) => {
     try {
       await programRepo.deleteDay(dayId);
@@ -90,6 +98,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Lisää harjoitus tiettyyn päivään
   const addExercise = async (programId, dayId, exerciseName) => {
     const newId = Date.now().toString();
     const name = exerciseName.trim();
@@ -117,6 +126,7 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Poista harjoitus päivästä
   const deleteExercise = async (programId, dayId, exerciseId) => {
     try {
       await programRepo.deleteExercise(exerciseId);
@@ -141,11 +151,14 @@ export const ProgramProvider = ({ children }) => {
     }
   };
 
+  // Hae treeniohjelma ID:llä
   const getProgramById = (programId) => programs.find((p) => p.id === programId);
 
+  // Hae päivä ID:llä tietystä treeniohjelmasta
   const getDayById = (programId, dayId) =>
     getProgramById(programId)?.days.find((d) => d.id === dayId);
 
+  // Tarjoa kontekstin arvot lapsikomponenteille
   return (
     <ProgramContext.Provider
       value={{
@@ -168,6 +181,7 @@ export const ProgramProvider = ({ children }) => {
   );
 };
 
+// Mukauta treeniohjelmakontekstin käyttöä
 export const useProgram = () => {
   const context = useContext(ProgramContext);
   if (!context) {

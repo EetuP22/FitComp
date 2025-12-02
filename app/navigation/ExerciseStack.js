@@ -5,7 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import ExerciseScreen from '../screens/ExerciseScreen';
 import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
 
+// Stack-navigaattori liikepankin ruuduille
 const Stack = createStackNavigator();
+
 
 export default function ExerciseStack() {
   return (

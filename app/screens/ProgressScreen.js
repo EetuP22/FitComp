@@ -3,10 +3,12 @@ import { View, StyleSheet, ScrollView, FlatList, Alert } from 'react-native';
 import { Text, Card, ActivityIndicator, Chip, Divider, Button } from 'react-native-paper';
 import { useWorkoutLog } from '../context';
 
+// Näkymä edistymiselle ja harjoituslokille
 export default function ProgressScreen() {
   const { workoutLogs, loading, deleteWorkoutLog } = useWorkoutLog();
   const [selectedExercise, setSelectedExercise] = useState(null);
 
+  // Laske tilastotiedot harjoituslokista
   const stats = useMemo(() => {
     if (!workoutLogs || workoutLogs.length === 0) {
       return {
@@ -16,6 +18,7 @@ export default function ProgressScreen() {
       };
     }
 
+    // Laske kokonaismäärä, uniikit harjoitukset ja viimeiset 7 päivää
     const uniqueExercises = new Set(workoutLogs.map(log => log.exercise_name));
     
     const now = new Date();
@@ -27,6 +30,7 @@ export default function ProgressScreen() {
       return logDate >= sevenDaysAgo && logDate <= now;
     }).length;
 
+    // Palauta tilastot
     return {
       totalWorkouts: workoutLogs.length,
       uniqueExercises: uniqueExercises.size,
@@ -34,6 +38,7 @@ export default function ProgressScreen() {
     };
   }, [workoutLogs]);
 
+  // Ryhmittele harjoitukset harjoitusnimen mukaan
   const exerciseGroups = useMemo(() => {
     if (!workoutLogs || workoutLogs.length === 0) return [];
 
@@ -45,6 +50,7 @@ export default function ProgressScreen() {
       groups[log.exercise_name].push(log);
     });
 
+    // Muunna ryhmät taulukoksi
     return Object.entries(groups).map(([name, logs]) => ({
       name,
       count: logs.length,
@@ -52,6 +58,7 @@ export default function ProgressScreen() {
     }));
   }, [workoutLogs]);
 
+  // Suodata lokit valitun harjoituksen mukaan
   const filteredLogs = useMemo(() => {
     if (!selectedExercise) return workoutLogs || [];
     return workoutLogs.filter(log => log.exercise_name === selectedExercise);
@@ -61,6 +68,7 @@ export default function ProgressScreen() {
     return [...filteredLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [filteredLogs]);
 
+  // Määritä edistymisindikaattori viimeisimpien lokien perusteella
   const getProgressIndicator = (logs) => {
     if (logs.length < 2) return null;
     
@@ -74,6 +82,7 @@ export default function ProgressScreen() {
     return '➡️';
   };
 
+  // Renderöi latausindikaattori
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -83,6 +92,7 @@ export default function ProgressScreen() {
     );
   }
 
+  // Päärenderöinti
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content}>
@@ -225,6 +235,7 @@ export default function ProgressScreen() {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },

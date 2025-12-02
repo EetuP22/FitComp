@@ -6,9 +6,11 @@ import { initDatabase } from './app/db/database';
 import { ProgramProvider, CalendarProvider, ExerciseProvider, WorkoutLogProvider } from './app/context';
 import { View, ActivityIndicator } from 'react-native';
 
+// Pääsovelluskomponentti
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
 
+  // Alusta tietokanta sovelluksen käynnistyessä
   useEffect(() => {
     const initDb = async () => {
       await initDatabase();
@@ -17,6 +19,7 @@ export default function App() {
     initDb();
   }, []);
 
+  // Näytä latausindikaattori, kunnes tietokanta on valmis
   if (!dbReady) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -25,6 +28,7 @@ export default function App() {
     );
   }
   
+  // Renderöi sovellus teeman ja kontekstien kanssa
   return (
     <PaperProvider theme={theme}>
       <ProgramProvider>

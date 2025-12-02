@@ -8,6 +8,7 @@ import { useProgram } from '../context/ProgramProvider';
 import { useCalendar } from '../context/CalendarProvider';
 import { useWorkoutLog } from '../context';
 
+// Kalenterin näkymä käyttäjälle
 export default function CalendarScreen() {
     const [selectedDate, setSelectedDate] = React.useState('');
     const [ modalVisible, setModalVisible ] = useState(false);
@@ -23,6 +24,7 @@ export default function CalendarScreen() {
   const [localIsDone, setLocalIsDone] = useState(false);
     
 
+  // Hakee tarvittavat funktiot ja tilat konteksteista
     const navigation = useNavigation();
     const { programs } = useProgram();
     const {
@@ -30,12 +32,12 @@ export default function CalendarScreen() {
       assignDayToDate,
       selectedDays,
       deleteCalendarEntry,
-      deleteCalendarEntryByDayId,
       markCalendarEntryAsDone,
       updateCalendarNotes,
     } = useCalendar();
     const { workoutLogs } = useWorkoutLog();
 
+    // Päivitä muistiinpanot ja suoritustila, kun valittu päivämäärä muuttuu
     useEffect(() => {
       if (!selectedDate) {
         setNote('');
@@ -46,9 +48,11 @@ export default function CalendarScreen() {
     setLocalIsDone(Boolean(assigned?.done === 1 || assigned?.done === true));
   }, [selectedDate, selectedDays]);
 
+  // Hae määritetty kalenterimerkintä
   const assigned = selectedDate ? getAssignedDay(selectedDate) : null;
   const isDone = localIsDone;
 
+  // Avaa määritetyn treenipäivän näkymän
     const openDay = () => {
       if (!assigned) return;
       navigation.navigate('DayDetailModal', {
@@ -57,6 +61,7 @@ export default function CalendarScreen() {
       });
     };
 
+    // Käsittele kalenterimerkinnän poistaminen
     const handleDeleteCalendarLog = async () => {
         if (!assigned) return;
         setDeleting(true);
@@ -71,6 +76,7 @@ export default function CalendarScreen() {
       }
      };
 
+     // Käsittele treenipäivän merkkaaminen tehdyksi
     const handleMarkDayAsDone = async () => {
         if (!selectedDate) return;
         setLocalIsDone(true);
@@ -84,6 +90,7 @@ export default function CalendarScreen() {
       }
     };
 
+    // Käsittele muistiinpanojen tallentaminen
     const handleSaveNote = async () => {
         if (!selectedDate) return;
         setSavingNote(true);
@@ -96,6 +103,7 @@ export default function CalendarScreen() {
       }
     };
 
+    // Ohjelman päivän valinta kalenterimerkinnäksi
     const onSelectProgramDay = async (date, programId, dayId) => {
       setAssigning(true);
       try {
@@ -109,10 +117,12 @@ export default function CalendarScreen() {
       }
     };
 
+    // Muodosta merkatut päivämäärät kalenteria varten
     const markedDates = useMemo(() => {
     const map = {};
     const loggedDates = new Set(workoutLogs?.map(log => log.date) || []);
     
+    // Merkitse valitut päivät ja lisää merkintöjä suoritettujen treenien perusteella
     Object.keys(selectedDays || {}).forEach((d) => {
       const entry = selectedDays[d];
       const hasLogs = loggedDates.has(d);
@@ -123,6 +133,7 @@ export default function CalendarScreen() {
       };
     });
     
+    // Lisää merkinnät päiville, joilla on treenilokeja mutta ei vielä merkintää
     loggedDates.forEach((date) => {
       if (!map[date]) {
         map[date] = {
@@ -132,6 +143,7 @@ export default function CalendarScreen() {
       }
     });
     
+    // Merkitse valittu päivämäärä
     if (selectedDate) {
       map[selectedDate] = {
         ...(map[selectedDate] || {}),
@@ -142,6 +154,7 @@ export default function CalendarScreen() {
     return map;
   }, [selectedDays, selectedDate, isDone, workoutLogs]);
 
+  // Renderöi kalenterinäkymä
   return (
     <View style={styles.container}>
       <CustAppBar title="Training Calendar" />
@@ -281,7 +294,7 @@ export default function CalendarScreen() {
     </View>
   );
 }
-
+// Tyylit kalenterinäkymälle
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   calendar: {marginHorizontal: 0},

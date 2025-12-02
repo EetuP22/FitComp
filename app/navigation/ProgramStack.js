@@ -5,9 +5,10 @@ import ProgramDetailScreen from '../screens/ProgramDetailScreen';
 import DayDetailScreen from '../screens/DayDetailScreen';
 import LogWorkoutScreen from '../screens/LogWorkoutScreen';
 
-
+// Stack-navigaattori treeniohjelmaruuduille
 const Stack = createStackNavigator();
 
+// Määrittää pino-navigaattorin ruudut ja niiden asetukset
 export default function ProgramStack() {
   return (
     <Stack.Navigator

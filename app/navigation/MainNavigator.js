@@ -12,9 +12,11 @@ import ProgressScreen from '../screens/ProgressScreen';
 import ExerciseStack from './ExerciseStack';
 import ProgramStack from './ProgramStack';
 
+// Päänavigaattori, joka sisältää välilehdet ja pino-navigaattorit
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
+// Kalenterin pino-navigaattori, joka sisältää modaalin päivän yksityiskohdille
 function CalendarWithDayModal() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: true }}>
@@ -40,6 +42,7 @@ function CalendarWithDayModal() {
   );
 }
 
+// Päänavigaattori, joka sisältää välilehdet ja pino-navigaattorit
 export default function MainNavigator() {
   return (
     <NavigationContainer>

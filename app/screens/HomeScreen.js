@@ -8,7 +8,7 @@ import { useWorkoutLog } from '../context';
 import CustAppBar from '../components/CustAppBar';
 import { gymRepo } from '../repositories/gymRepo';
 
-
+// Näkymä kotisivulle
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { programs } = useProgram();
@@ -16,6 +16,7 @@ export default function HomeScreen() {
   const { workoutLogs } = useWorkoutLog();
   const [ favoriteGyms, setFavoriteGyms ] = React.useState([]);
 
+  // Hae suosikkikuntosalit käynnistyksen yhteydessä
   React.useEffect(() => {
     (async () => {
       const saved = await gymRepo.getAllFavoriteGyms();
@@ -23,8 +24,10 @@ export default function HomeScreen() {
     })();
   }, []);
 
+  // Nykyinen päivä merkkijonona
 const today = new Date().toISOString().split('T')[0];
 
+// Nykyisen päivän harjoitusvalinta
 const todayTraining = selectedDays[today];
   const todayDay = useMemo(() => {
     if (!todayTraining) return null;
@@ -36,6 +39,7 @@ const todayTraining = selectedDays[today];
   }, [programs, selectedDays, today]);
 
 
+  // Viikon tilastot
   const weeklyStats = useMemo(() => {
     const stats = {
       total: 0,
@@ -60,28 +64,34 @@ const todayTraining = selectedDays[today];
     return stats;
   }, [selectedDays]);
 
+  // Viikon suoritusprosentti
   const completionRate =
     weeklyStats.total > 0 ? (weeklyStats.completed / weeklyStats.total) * 100 : 0;
 
+  // Viimeisin treeniloki
   const latestWorkout = useMemo(() => {
     if (!workoutLogs || workoutLogs.length === 0) return null;
     return workoutLogs[0];
   }, [workoutLogs]);
 
+  // Navigoi kalenteriin
   const navigateToCalendar = () => {
     navigation.navigate('Calendar');
   };
 
+  // Navigoi ohjelmiin
   const navigateToPrograms = () => {
     navigation.navigate('Programs');
   };
 
+  // Navigoi suosikkikuntosaleihin kartalla(Todellisuudessa kuntosalikartan perusnäkymä)
   const navigateToFavoriteGyms = () => {
     navigation.navigate('Map', { showFavorites: true });  
   };
 
   const favoriteGymsCount = favoriteGyms.length;
 
+  // Päärenderöinti
   return (
     <View style={styles.container}>
       <CustAppBar title="FitComp - Your Fitness Companion" />
@@ -264,6 +274,7 @@ const todayTraining = selectedDays[today];
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   content: { flex: 1, padding: 16 },

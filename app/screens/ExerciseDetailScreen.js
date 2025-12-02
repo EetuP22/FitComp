@@ -5,6 +5,7 @@ import { exerciseRepo } from '../repositories/exerciseRepo';
 import { exerciseService } from '../services/exerciseService';
 import { useWorkoutLog } from '../context';
 
+// Näkymä harjoituksen yksityiskohdille
 export default function ExerciseDetailScreen({ route, navigation }) {
   const { id, returnTo, programId, dayId } = route.params || {};
   const [exercise, setExercise] = useState(null);
@@ -13,6 +14,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const { getLogsByExercise } = useWorkoutLog();
 
+  // Käsittele sulkeminen ja navigointi takaisin edelliseen näkymään
   const handleClose = () => {
     if (returnTo === 'DayDetail' && programId && dayId) {
       navigation.navigate('Programs', {
@@ -24,6 +26,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     }
   };
 
+  // Lataa harjoituksen tiedot ja siihen liittyvät lokit
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -50,6 +53,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     };
   }, [id, getLogsByExercise]);
 
+  // Renderöi latausindikaattori tai harjoituksen tiedot
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -58,6 +62,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     );
   }
 
+  // Renderöi virheilmoitus, jos harjoitusta ei löydy
   if (!exercise) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -67,6 +72,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
     );
   }
 
+  // Päärenderöinti
   return (
     <ScrollView style={styles.container}>
       <Card style={styles.card}>
@@ -136,6 +142,7 @@ export default function ExerciseDetailScreen({ route, navigation }) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12, backgroundColor: '#fff' },
   card: { marginBottom: 20, elevation: 2 },

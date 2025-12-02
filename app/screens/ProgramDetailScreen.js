@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useProgram } from '../context/ProgramProvider';
 import { useCalendar } from '../context/CalendarProvider';
 
+// Näkymä valitun ohjelman yksityiskohdille
 export default function ProgramDetailScreen({ route }) {
     const { programId } = route.params;
     const { getProgramById, addDay, deleteDay } = useProgram();
@@ -15,21 +16,25 @@ export default function ProgramDetailScreen({ route }) {
 
     if (!program) return <Text>Program not found.</Text>;
 
+    // Käsittele päivän lisääminen
   const handleAddDay = () => {
     if (!dayName.trim()) return;
     addDay(programId, dayName.trim());
     setDayName('');
   };
 
+  // Käsittele päivän poistaminen
   const handleDeleteDay = async (dayId) => {
     await deleteCalendarEntryByDayId(dayId);
     await deleteDay(programId, dayId);
   }
 
+  // Avaa päivän yksityiskohdat
   const openDay = (dayId) => {
     navigation.navigate('DayDetail', { programId, dayId });
   };
 
+  // Renderöi päivän kortin
   const renderDay = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.name} />
@@ -49,6 +54,7 @@ export default function ProgramDetailScreen({ route }) {
   );
 
 
+  // Päärenderöinti
     return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -83,6 +89,7 @@ export default function ProgramDetailScreen({ route }) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   content: { flex: 1, padding: 16 },

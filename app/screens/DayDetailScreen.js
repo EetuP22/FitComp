@@ -4,6 +4,7 @@ import { Card, Button, TextInput, Text, Divider, Snackbar } from 'react-native-p
 import { useProgram } from '../context/ProgramProvider';
 import { useNavigation } from '@react-navigation/native';
 
+// Näkymä valitun päivän yksityiskohdille
 export default function DayDetailScreen({ route }) {
   const { programId, dayId } = route.params;
   const { getDayById, addExercise, deleteExercise } = useProgram();
@@ -13,6 +14,7 @@ export default function DayDetailScreen({ route }) {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
+  // jos ei löydy päivä, näytä virheilmoitus
   if (!day) {
     return (
       <View style={styles.container}>
@@ -20,12 +22,15 @@ export default function DayDetailScreen({ route }) {
       </View>
     );
   }
+
+  // Käsittele harjoituksen lisääminen
   const handleAddExercise = async () => {
     if (!exerciseName.trim()) return;
     addExercise(programId, dayId, exerciseName.trim());
     setExerciseName('');
   };
 
+  // Käsittele harjoitusten selaaminen ja valinta kirjastosta
   const handleBrowseLibrary = () => {
     navigation.navigate('Exercises', {
       screen: 'ExerciseList',
@@ -40,6 +45,7 @@ export default function DayDetailScreen({ route }) {
     });
   };
 
+  // Avaa harjoituksen yksityiskohdat
   const openExerciseDetail = async (exerciseName) => {
     try {
       const { exerciseRepo } = require('../repositories/exerciseRepo');
@@ -49,6 +55,7 @@ export default function DayDetailScreen({ route }) {
         ex.name.toLowerCase() === exerciseName.toLowerCase()
       );
       
+      // Jos löytyy tarkka osuma, avaa se, muuten avaa ensimmäinen tulos tai näytä virhe
       if (exactMatch) {
         navigation.navigate('Exercises', {
           screen: 'ExerciseDetail',
@@ -80,6 +87,7 @@ export default function DayDetailScreen({ route }) {
     }
   };
 
+  // Renderöi yksittäinen harjoitus korttina
   const renderExercise = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title title={item.name} />
@@ -117,6 +125,7 @@ export default function DayDetailScreen({ route }) {
     </Card>
   );
 
+  // Päärenderöinti
   return (
     <View style={styles.container}>
         <Text style={styles.title}>{day.name}</Text>
@@ -170,6 +179,7 @@ export default function DayDetailScreen({ route }) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   title: {

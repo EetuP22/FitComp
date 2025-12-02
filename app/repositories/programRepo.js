@@ -1,3 +1,4 @@
+// Määritellään ohjelmarepositorio ohjelmien, päivien ja harjoitusten käsittelyyn
 import {
   getPrograms as dbGetPrograms,
   addProgram as dbAddProgram,
@@ -10,6 +11,7 @@ import {
   deleteExerciseFromDb,
 } from '../db/database';
 
+// Määritellään ohjelmarepositorio
 export const programRepo = {
   async getPrograms() {
     try {
@@ -36,6 +38,7 @@ export const programRepo = {
     }
   },
 
+  // Lisää uusi ohjelma tietokantaan
   async addProgram(id, name, description) {
     try {
       await dbAddProgram(id, name, description);
@@ -45,6 +48,7 @@ export const programRepo = {
     }
   },
 
+  // Poista ohjelma tietokannasta
   async deleteProgram(id) {
     try {
       await dbDeleteProgram(id);
@@ -54,6 +58,7 @@ export const programRepo = {
     }
   },
 
+  // Lisää päivä ohjelmaan
   async addDay(id, programId, name) {
     try {
       await addDayToDb(id, programId, name);
@@ -63,6 +68,7 @@ export const programRepo = {
     }
   },
 
+  // Poista päivä ohjelmasta
   async deleteDay(id) {
     try {
       await deleteDayFromDb(id);
@@ -72,6 +78,7 @@ export const programRepo = {
     }
   },
 
+  // Lisää harjoitus päivään
   async addExercise(id, dayId, name) {
     try {
       await addExerciseToDb(id, dayId, name);
@@ -81,6 +88,7 @@ export const programRepo = {
     }
   },
 
+  // Poista harjoitus päivästä
   async deleteExercise(id) {
     try {
       await deleteExerciseFromDb(id);

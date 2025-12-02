@@ -1,13 +1,16 @@
 import React, { createContext, useContext, useState } from 'react';
 import { exerciseRepo } from '../repositories/exerciseRepo';
 
+// Luo konteksti harjoituksille
 const ExerciseContext = createContext();
 
+// Tarjoa harjoituskonteksti lapsikomponenteille
 export const ExerciseProvider = ({ children }) => {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Hae harjoituksia annetuilla suodattimilla
   const searchExercises = async (filters = {}) => {
     setLoading(true);
     setError(null);
@@ -22,6 +25,7 @@ export const ExerciseProvider = ({ children }) => {
     }
   };
 
+  // Hae harjoituksia tietyn lihasryhmän perusteella
   const searchByMuscle = async (muscle) => {
     setLoading(true);
     setError(null);
@@ -35,7 +39,8 @@ export const ExerciseProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
+// Lisää mukautettu harjoitus tietokantaan
+// Ei ole tällä hetkellä käytössä käyttöliittymässä!
   const addCustomExercise = async (id, name, muscle, difficulty) => {
     try {
       await exerciseRepo.addCustomExercise(id, name, muscle, difficulty);
@@ -46,6 +51,7 @@ export const ExerciseProvider = ({ children }) => {
     }
   };
 
+  // Tarjoa kontekstin arvot lapsikomponenteille
   return (
     <ExerciseContext.Provider
       value={{
@@ -62,6 +68,7 @@ export const ExerciseProvider = ({ children }) => {
   );
 };
 
+// Mukauta harjoituskontekstin käyttöä
 export const useExercise = () => {
   const context = useContext(ExerciseContext);
   if (!context) {

@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button, Text, Card, Snackbar } from 'react-native-paper';
 import { useWorkoutLog } from '../context';
 
+// Näkymä harjoituksen loggaamiselle
 export default function LogWorkoutScreen({ route, navigation }) {
   const { exerciseId, exerciseName } = route.params || {};
   const { addWorkoutLog } = useWorkoutLog();
@@ -16,6 +17,7 @@ export default function LogWorkoutScreen({ route, navigation }) {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
+  // Käsittele lomakkeen lähetys
   const handleSubmit = async () => {
     if (!exerciseName) {
       setSnackbarMessage('Exercise name is required');
@@ -23,12 +25,14 @@ export default function LogWorkoutScreen({ route, navigation }) {
       return;
     }
 
+    // Varmista, että päivämäärä on asetettu
     if (!date) {
       setSnackbarMessage('Date is required');
       setSnackbarVisible(true);
       return;
     }
 
+    // Muunna syötetyt arvot oikeisiin tyyppeihin
     const parsedSets = sets ? parseInt(sets, 10) : null;
     const parsedReps = reps ? parseInt(reps, 10) : null;
     const parsedWeight = weight ? parseFloat(weight) : null;
@@ -47,7 +51,7 @@ export default function LogWorkoutScreen({ route, navigation }) {
       
       setSnackbarMessage('Workout logged successfully!');
       setSnackbarVisible(true);
-      
+      // Palaa edelliseen näkymään hetken kuluttua
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
@@ -59,6 +63,7 @@ export default function LogWorkoutScreen({ route, navigation }) {
     }
   };
 
+  // Renderöi lomake
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content}>
@@ -150,6 +155,7 @@ export default function LogWorkoutScreen({ route, navigation }) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   content: { flex: 1, padding: 16 },

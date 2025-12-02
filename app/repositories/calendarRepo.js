@@ -1,3 +1,4 @@
+// importataan tietokantatoiminnot kalenterimerkintöjen hallintaan
 import {
   dbAssignDayToDate,
   getCalendarEntries,
@@ -7,6 +8,7 @@ import {
   dbUpdateCalendarNotes,
 } from '../db/database';
 
+// Määritellään kalenterirepositorio kalenterimerkintöjen käsittelyyn
 export const calendarRepo = {
   async getCalendarEntries() {
     try {
@@ -27,6 +29,7 @@ export const calendarRepo = {
     }
   },
 
+  // Määritä treenipäivä tietylle päivämäärälle
   async assignDayToDate(date, programId, dayId) {
     try {
       await dbAssignDayToDate(date, programId, dayId);
@@ -36,6 +39,7 @@ export const calendarRepo = {
     }
   },
 
+  // Poista kalenterimerkintä tietystä päivämäärästä
   async deleteCalendarEntry(date) {
     try {
       await dbDeleteCalendarEntry(date);
@@ -45,6 +49,7 @@ export const calendarRepo = {
     }
   },
 
+  // Poista kalenterimerkintä päivä-ID:n perusteella(Jos kyseinen päivä poistetaan ohjelmasta)
   async deleteCalendarEntryByDayId(dayId) {
     try {
       await dbDeleteCalendarEntryByDayId(dayId);
@@ -54,6 +59,7 @@ export const calendarRepo = {
     }
   },
 
+  // Merkitse kalenterimerkintä tehdyksi
   async markCalendarEntryAsDone(date) {
     try {
       await dbMarkCalendarEntryAsDone(date);
@@ -63,6 +69,7 @@ export const calendarRepo = {
     }
   },
 
+  // Päivitä kalenterimerkinnän muistiinpanot
   async updateCalendarNotes(date, notes) {
     try {
       await dbUpdateCalendarNotes(date, notes);

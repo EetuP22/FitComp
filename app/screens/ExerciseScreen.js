@@ -6,6 +6,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { exerciseRepo } from '../repositories/exerciseRepo';
 import { exerciseService } from '../services/exerciseService';
 
+// Näkymä harjoituksille
 export default function ExerciseScreen({ route }) {
   const { exercises, loading, error, searchExercises, searchByMuscle } = useExercise();
   const [query, setQuery] = useState('');
@@ -14,9 +15,11 @@ export default function ExerciseScreen({ route }) {
   const [selectedMuscle, setSelectedMuscle] = useState(null);
   const navigation = useNavigation();
 
+  // Tarkista valintatila ja valintafunktio reitin parametreista
   const selectionMode = route?.params?.selectionMode === true;
   const onSelectExercise = route?.params?.onSelectExercise;
 
+  // Lataa lihakset ja suorita alkuhaku
  useEffect(() => {
     searchExercises({ search: '', page: 1, limit: 30 });
     
@@ -31,6 +34,7 @@ export default function ExerciseScreen({ route }) {
     })();
   }, []);
 
+  // Käsittele hakukyselyn päivitys reitin parametrien perusteella
   useEffect(() => {
     const searchQuery = route?.params?.searchQuery;
     if (searchQuery) {
@@ -39,6 +43,7 @@ export default function ExerciseScreen({ route }) {
     }
   }, [route?.params?.searchQuery]);
 
+  // Automaattinen avaus, jos määritetty
   useEffect(() => {
     const autoOpenFirst = route?.params?.autoOpenFirst;
     if (autoOpenFirst && exercises.length > 0 && !loading) {
@@ -48,12 +53,14 @@ export default function ExerciseScreen({ route }) {
     }
   }, [exercises, loading, route?.params?.autoOpenFirst]);
 
+  // Käsittele hakulähetys
   const onSearchSubmit = () => {
     if (query.trim()) {
       searchExercises({ search: query, page: 1, limit: 30 });
     }
   };
 
+  // Käsittele lihasvalinta
   const onSelectMuscle = (m) => {
     const val = selectedMuscle === m.id ? null : m.id;
     setSelectedMuscle(val);
@@ -64,6 +71,7 @@ export default function ExerciseScreen({ route }) {
     }
   };
 
+  // Käsittele harjoituksen yksityiskohtien avaaminen
   const openDetail = (exercise) => {
     if (selectionMode && typeof onSelectExercise === 'function') {
       onSelectExercise(exercise);
@@ -74,6 +82,7 @@ export default function ExerciseScreen({ route }) {
     navigation.navigate('ExerciseDetail', { id: exercise.id });
   };
 
+  // Renderöi harjoituslista
  const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => openDetail(item)}>
       <Card style={styles.card}>
@@ -102,6 +111,8 @@ export default function ExerciseScreen({ route }) {
       </Card>
     </TouchableOpacity>
   );
+
+  // Päärenderöinti
   return (
     <View style={styles.container}>
       <Searchbar
@@ -151,6 +162,7 @@ export default function ExerciseScreen({ route }) {
   );
 }
 
+// Tyylit
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
   search: { margin: 12 },
